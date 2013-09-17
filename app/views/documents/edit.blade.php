@@ -101,7 +101,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
     $stat;
 
   function addTask(title) {
-      $stat.append('<img src="{{ URL::to('/img/spinner2.gif') }}" title="' + title + '" /> ');
+      $stat.append('<img src="{{ URL::to('/assets/spinner2.gif') }}" title="' + title + '" /> ');
       tasks += 1;
   }
 
@@ -112,7 +112,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
 
   function sruTask(repo, query, cb) {
       addTask(repo);
-      $.getJSON('http://labs.biblionaut.net/services/sru_iteminfo.php?repo=' + repo + '&callback=?', query)
+      $.getJSON('//services2.biblionaut.net/sru_iteminfo.php?repo=' + repo + '&callback=?', query)
       .done(function(response) {
           response.repo = repo;
           results.push(response);
@@ -155,7 +155,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
 
       // ID lookup:
       addTask('ID lookup');
-      $.getJSON('http://labs.biblionaut.net/services/getids.php?id=' + query.dokid + '&callback=?')
+      $.getJSON('//services2.biblionaut.net/getids.php?id=' + query.dokid + '&callback=?')
       .error(function() {
           alert("Fikk ikke svar fra " + repo + "...");
           taskDone();
