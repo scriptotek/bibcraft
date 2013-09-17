@@ -5,8 +5,7 @@
 	"require": {
 		"laravel/framework": "4.0.*",
 		"way/generators": "dev-master",
-        "knplabs/knp-snappy": "dev-master",
-        "dflydev/markdown": "1.0.*@dev"
+		"civocr/nexmo-php-lib": "dev-master"
 	},
 	"autoload": {
 		"classmap": [
@@ -30,6 +29,9 @@
 		],
 		"post-create-project-cmd": [
 			"php artisan key:generate"
+		],
+		"post-create-project-cmd": [
+			"mkdir app/storage/covers"
 		]
 	},
 	"config": {

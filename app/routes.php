@@ -12,10 +12,26 @@
 */
 
 Route::get('/', function() {
-	return Redirect::action('ItemsController@getIndex');
+	return Redirect::action('DocumentsController@getIndex');
 });
-Route::get('/cover/{isbn}', 'ItemsController@locateCover');
+Route::get('/cover/{isbn}', 'DocumentsController@locateCover');
+
+
+Route::get('/selfservice', function() {
+	return View::make('selfservice');
+});
+
+Route::get('/minelan', function() {
+	return View::make('minelaan');
+});
 
 #Route::controller('/cover', 'CoversController');
 
-Route::controller('items', 'ItemsController');
+Route::controller('documents', 'DocumentsController');
+Route::get('collections/{collectionId}/documents', array('as' => 'collectionDocuments', 'uses' => 'DocumentsController@getIndex'));
+
+Route::controller('collections', 'CollectionsController');
+Route::controller('loans', 'LoansController');
+Route::controller('users', 'UsersController');
+
+

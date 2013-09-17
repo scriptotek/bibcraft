@@ -9,10 +9,17 @@ class BaseController extends Controller {
 	 */
 	protected function setupLayout()
 	{
+
+		// Always pass Session['status'] to master:
+		View::composer('master', function($view){
+			$view->with('status', Session::get('status'));
+		});
+
 		if ( ! is_null($this->layout))
 		{
 			$this->layout = View::make($this->layout);
 		}
+
 	}
 
 }
