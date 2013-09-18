@@ -28,8 +28,9 @@ class Document extends Eloquent {
         'bibsys_objektid' => 'required|regex:/^[0-9xX]{9}$/',
         'bibsys_dokid' => 'required|unique:documents,bibsys_dokid,:id:',
         'bibsys_knyttid' => 'unique:documents,bibsys_knyttid,:id:',
-        'isbn' => 'required|unique:documents,isbn,:id:|regex:/^[0-9xX]{10,13}$/',
+        'isbn' => 'unique:documents,isbn,:id:|regex:/^[0-9xX]{10,13}$/',
         'title' => 'required',
+        'publisher' => 'required',
         'year' => 'required|numeric',
         'cover' => 'url',
     );
