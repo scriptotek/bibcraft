@@ -96,23 +96,42 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
   }
 
   var results = [],
+    openLibraryResult = '',
     tasks = 0,
     $btn,
     $stat;
 
   function addTask(title) {
-      $stat.append('<img src="{{ URL::to('/img/spinner2.gif') }}" title="' + title + '" /> ');
+      $stat.append('<img src="{{ URL::to('/assets/spinner2.gif') }}" title="' + title + '" /> ');
       tasks += 1;
   }
 
   function taskDone() {
       tasks -= 1;
       $stat.find('img').first().remove();
+      console.log('tasks left');
+  }
+
+  function openLibraryTask(isbn) {
+      addTask('Open Library');
+      var url = '//services2.biblionaut.net/open_library_cover.php';
+      $.get(url + '?isbn=' + isbn + '&callback=?')
+      .done(function(response) {
+          console.log('Fant noe? ' + response);
+          openLibraryResult = response;
+          taskDone();
+          checkFinish();
+      })
+      .error(function() {
+          alert("Fikk ikke svar fra " + url + "...");
+          tasks -= 1;
+          checkFinish();
+      });
   }
 
   function sruTask(repo, query, cb) {
       addTask(repo);
-      $.getJSON('http://labs.biblionaut.net/services/sru_iteminfo.php?repo=' + repo + '&callback=?', query)
+      $.getJSON('//services2.biblionaut.net/sru_iteminfo.php?repo=' + repo + '&callback=?', query)
       .done(function(response) {
           response.repo = repo;
           results.push(response);
@@ -132,6 +151,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
 
   function checkFinish() {
       if (tasks === 0) {
+          console.log("---------------------------------------");
           console.log("COMPLETE!");
           $btn.button('reset');
           $stat.html('');
@@ -155,7 +175,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
 
       // ID lookup:
       addTask('ID lookup');
-      $.getJSON('http://labs.biblionaut.net/services/getids.php?id=' + query.dokid + '&callback=?')
+      $.getJSON('//services2.biblionaut.net/getids.php?id=' + query.dokid + '&callback=?')
       .error(function() {
           alert("Fikk ikke svar fra " + repo + "...");
           taskDone();
@@ -177,6 +197,9 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
                 $('h2').after('<div class="alert alert-error"><a class="close" data-dismiss="alert" href="#">&times;</a> Fant ingen poster i ' + repo + '. </div>');
                 return;
             }
+
+            // Ask OpenLibrary
+            openLibraryTask(response.isbn[0]);
 
             // Ask LC:
             if (query.isbn === undefined) {
@@ -229,7 +252,12 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
 
       for (var i = 0; i < results.length; i++) {
           if (results[i].cover_image && results[i].cover_image != '') {
+              console.log('Fant bilde i bibsys');
               $('#cover').val(results[i].cover_image);
+              updateCover();
+          } else if (openLibraryResult != '') {
+              console.log('Fant bilde i openlibrary');
+              $('#cover').val(openLibraryResult);
               updateCover();
           }
           if (results[i].summary !== undefined) {
