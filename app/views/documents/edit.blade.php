@@ -55,7 +55,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       {{ Form::textWithLabel('subtitle', 'Undertittel') }}
       {{ Form::textWithLabel('authors', 'Forfatter(e) e.l.') }}
       {{ Form::textWithLabel('publisher', 'Forlag') }}
-      {{ Form::textWithLabel('serie', 'Serie') }}
+      {{ Form::textWithLabel('series', 'Serie') }}
       {{ Form::textWithLabel('volume', 'Bind') }}
       {{ Form::textWithLabel('year', 'Utgivelsesår') }}
       {{ Form::textWithLabel('cover', 'Omslagsbilde-URL') }}
@@ -243,7 +243,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       }
       $('#authors').val(authors.join('; '));
       $('#publisher').val(bibsysResults.publisher);
-      $('#series').val(bibsysResults.series);
+      $('#series').val(bibsysResults.series ? bibsysResults.series.title : '');
       $('#volume').val(bibsysResults.volume);
       for (var i=0; i < bibsysResults.klass.length; i++) {
           if (bibsysResults.klass[i].system === 'dewey') {
