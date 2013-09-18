@@ -201,7 +201,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
             }
 
             // Ask OpenLibrary
-            if (response.isbn.length > 0) {
+            if (response.isbn) {
               openLibraryTask(response.isbn[0]);
 
               // Ask LC:
@@ -235,7 +235,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
           url = 'http://ask.bibsys.no/ask/action/show?pid=' + bibsysResults.recordid + '&kid=biblio';
 
       $('#bibsys_objektid').val(bibsysResults.recordid);
-      $('#isbn').val(bibsysResults.isbn.length > 0 ? bibsysResults.isbn[0] : '');
+      $('#isbn').val(bibsysResults.isbn ? bibsysResults.isbn[0] : '');
       $('#title').val(bibsysResults.title.replace(/[\s]*:[\s]*$/, ''));
       $('#subtitle').val(bibsysResults.subtitle);
       $('#year').val(bibsysResults.year);
