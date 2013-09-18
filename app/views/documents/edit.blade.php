@@ -115,14 +115,16 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
   function openLibraryTask(isbn) {
       addTask('Open Library');
       var url = '//services2.biblionaut.net/open_library_cover.php';
-      $.get(url + '?isbn=' + isbn + '&callback=?')
+      $.getJSON(url + '?isbn=' + isbn + '&callback=?')
       .done(function(response) {
           console.log('Fant noe? ' + response);
-          openLibraryResult = response;
+          if (response.url) {
+            openLibraryResult = response.url;
+          }
           taskDone();
           checkFinish();
       })
-      .error(function() {
+      .error(function(e) {
           alert("Fikk ikke svar fra " + url + "...");
           tasks -= 1;
           checkFinish();
