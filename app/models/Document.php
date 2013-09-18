@@ -17,7 +17,7 @@ class Document extends Eloquent {
      * @var array
      */
     public static $fields = array('bibsys_objektid', 'bibsys_dokid', 'bibsys_knyttid',
-        'isbn', 'title', 'subtitle', 'authors', 'year', 'cover', 'publisher', 'dewey');
+        'series', 'isbn', 'title', 'subtitle', 'authors', 'year', 'cover', 'publisher', 'dewey');
 
     /**
      * Hard validation rules for humans with brains.
