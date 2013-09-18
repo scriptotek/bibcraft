@@ -12,11 +12,11 @@ class DocumentsController extends BaseController {
 	 * @param  string  $dokid
 	 * @return Response
 	 */
-	public function getShow($dokid)
+	public function getShow($id)
 	{
-		$doc = Document::where('bibsys_dokid','=',$dokid)->first();
+		$doc = Document::with('loans')->where('id','=',$id)->orWhere('bibsys_dokid','=',$id)->orWhere('bibsys_knyttid','=',$id)->first();
 		if (!$doc) {
-			return Response::JSON(array());
+			return Response::JSON(array('error' => 'not_found'));
 		}
 		return Response::JSON($doc);
 	}
@@ -37,7 +37,9 @@ class DocumentsController extends BaseController {
 
         if ($collectionId) {
             $collection = Collection::find($collectionId);
-            if (!$collection) dd("collection does not exists");
+            if (!$collection) {
+                return Response::json(array('error' => 'collection does not exists'));
+            }
             $documents = $collection->documents()->with('loans')->paginate($itemsPerPage);
         } else {
             $documents = Document::with('loans')->paginate($itemsPerPage);
@@ -250,7 +252,8 @@ class DocumentsController extends BaseController {
 
         $cover_path = storage_path() . '/covers/' . $cached_cover;
 
-        if (!file_exists($cover_path)) {
+        if (!file_exists($cover_path) && $doc->cover) {
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $doc->cover);
             curl_setopt($ch, CURLOPT_USERAGENT, 'UBO Scriptotek Dalek/0.1 (+http://biblionaut.net/bibsys/)');
