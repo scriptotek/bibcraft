@@ -53,7 +53,7 @@
     <li style="margin:10px;padding: 10px; background:#ececec;">
       <input type="checkbox" style="float:left; display: block; height: 120px; width:30px;" name="check_{{ $obj->id }}" />
       <div style="float:left; width:120px; height: 120px; margin:3px 8px;">
-        <img src="{{ URL::action('DocumentsController@getCover', $obj->id) }}" style="max-height: 120px; max-width: 120px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">
+        <img src="{{ $obj->cachedCover }}" style="max-height: 120px; max-width: 120px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">
       </div>
       <strong>{{ $obj->title }} {{ $obj->subtitle }}</strong> ({{$obj->publisher }} {{$obj->year }})<br />
       Av: {{ $obj->authors }}<br />
@@ -69,8 +69,9 @@
       <br />
 
       <?php
+      // If too many items are shown on the page, checking the imagesize for everyone would be sloooow
       if (intval(Input::get('itemsPerPage', Session::get('itemsPerPage', '10'))) < 50) {
-        list($width, $height) = @getimagesize( URL::action('DocumentsController@getCover', $obj->id) );
+        list($width, $height) = @getimagesize( public_path() . $obj->cachedCover );
         echo 'Omslagsbilde: ';
         if ($width) {
           echo $width . ' x ' . $height . ' px';
