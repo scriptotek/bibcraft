@@ -6,7 +6,8 @@
 
 		this.getBooks = function(collectionId, page, itemsPerPage, LogService) {
 
-			var promise = $http.get('/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page).then(function (response) {
+			var promise = $http({method: 'GET', cache: true, url: '/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page})
+			.then(function (response) {
 				// The then function here is an opportunity to modify the response
 				console.log(response);
 				// The return value gets picked up by the then in the controller.

@@ -17,8 +17,8 @@ angular.module('bibcraft', ['ngRoute', 'ngAnimate',
 // Setup routes
 .config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 	$routeProvider
-    .when('/browse', {templateUrl: '/app/collection/browse.tpl.html', controller: 'CollectionController'})
-    .when('/browse/:page', {templateUrl: '/app/collection/browse.tpl.html', controller: 'CollectionController'})
+    .when('/browse', {templateUrl: '/app/collection/collection.tpl.html', controller: 'CollectionController'})
+    .when('/browse/:page', {templateUrl: '/app/collection/collection.tpl.html', controller: 'CollectionController'})
 		.when('/index', {templateUrl: '/app/selfservice/index/index.tpl.html', controller: 'SelfServiceIndexController'})
 		.when('/cart', {templateUrl: '/app/selfservice/cart/cart.tpl.html', controller: 'CartController'})
     .when('/checkout', {templateUrl: '/app/selfservice/checkout/checkout.tpl.html', controller: 'CheckoutController'})

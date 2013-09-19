@@ -79,6 +79,29 @@ class Document extends Eloquent {
         return $a;
     }
 
+    /*
+     * cachedCover as virtual attribute
+     */
+    public function getCachedCoverAttribute()
+    {
+        $cover_url = $this->cover;
+        $dir = '/covers/';
+        if ($cover_url) {
+            return $dir . sha1($cover_url) . '.jpg';
+        }
+        return $dir . 'blank.jpg';
+    }
+
+    /*
+     * Override toArray to include cachedCover
+     */
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['cachedCover'] = $this->cachedCover;
+        return $array;
+    }
+
     /**
      * Process validation rules.
      *
@@ -120,6 +143,74 @@ class Document extends Eloquent {
         return true;
     }
 
+     /**
+     * Returns the image mime type for a given file,
+     * or false if the file is not an image.
+     *
+     * @param  string  $path
+     * @return string
+     */
+    function getMimeType($path)
+    {
+        $a = getimagesize($path);
+        $image_type = $a[2];
+
+        if(in_array($image_type, array(IMAGETYPE_GIF,
+                                       IMAGETYPE_JPEG,
+                                       IMAGETYPE_PNG,
+                                       IMAGETYPE_BMP,
+                                       IMAGETYPE_TIFF_II,
+                                       IMAGETYPE_TIFF_MM)))
+        {
+            return image_type_to_mime_type($image_type);
+        }
+        return false;
+    }
+
+    /**
+     * Store cover image from url in cache
+     *
+     * @param  string  $url
+     * @param  string  $path
+     * @return boolean
+     */
+    public function cacheCover($url, $path)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'UBO Scriptotek Dalek/0.1 (+http://biblionaut.net/bibsys/)');
+        //curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.65 Safari/537.36');
+        curl_setopt($ch, CURLOPT_HEADER, 0); // no headers in the output
+        curl_setopt($ch, CURLOPT_REFERER, 'http://ask.bibsys.no');
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 2);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        file_put_contents($path, $data);
+
+        $mime = $this->getMimeType($path);
+        if ($mime === false) {
+
+            // if it's not an image, we just delete it
+            // (might be a 404 page for instance)
+            unlink($path);
+            return false;
+
+        } else if ($mime !== 'image/jpeg') {
+
+            rename("$path", "$path.1");
+            $image = new Imagick("$path.1");
+            $image->setImageFormat('jpg');
+            $image->writeImage("$path");
+            unlink("$path.1");
+
+        }
+
+        return true;
+    }
+
     /**
      * Save the model to the database.
      *
@@ -136,15 +227,16 @@ class Document extends Eloquent {
         } else {
             //Log::info('Oppdaterte tingen: ' . $this->name);
         }
+
+        if ($this->isDirty('cover')) {
+            if ($this->cover) {
+                $path = public_path() . '/covers/' . sha1($this->cover) . '.jpg';
+                $this->cacheCover($this->cover, $path);
+            }
+        }
+
         parent::save($options);
         return true;
-    }
-
-
-    public function cached_cover() {
-        $cover_url = $this->cover;
-        $ext = '.jpg';
-        return sha1($cover_url) . $ext;
     }
 
 }

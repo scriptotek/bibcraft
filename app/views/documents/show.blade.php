@@ -29,7 +29,7 @@
         <td class="col1">
 
           <div class="cover">
-            <img src="{{ URL::action('DocumentsController@getCover', $document->id) }}" />
+            <img src="{{ $document->cachedCover }}" />
           </div>
 
         </td>
