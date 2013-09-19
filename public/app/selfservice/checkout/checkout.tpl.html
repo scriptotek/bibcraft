@@ -1,0 +1,234 @@
+<div class="wizard">
+  <div style="padding:20px;">
+
+    <div class="slides2" style="position:relative;width:100%;">
+
+    <div class="slide" ng-if="step=='start'">
+
+          <h3>
+            Har du lånekort fra før? Skann kortet nå.<br />
+            Hvis ikke, tast inn telefonnummeret ditt.
+          </h3>
+
+          <table class="numpad">
+            <tr>
+              <td>
+                <a href ng-click="tast('1')" class="btn btn-warning">1</a>
+              </td>
+              <td>
+                <a href ng-click="tast('2')" class="btn btn-warning">2</a>
+              </td>
+              <td>
+                <a href ng-click="tast('3')" class="btn btn-warning">3</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href ng-click="tast('4')" class="btn btn-warning">4</a>
+              </td>
+              <td>
+                <a href ng-click="tast('5')" class="btn btn-warning">5</a>
+              </td>
+              <td>
+                <a href ng-click="tast('6')" class="btn btn-warning">6</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href ng-click="tast('7')" class="btn btn-warning">7</a>
+              </td>
+              <td>
+                <a href ng-click="tast('8')" class="btn btn-warning">8</a>
+              </td>
+              <td>
+                <a href ng-click="tast('9')" class="btn btn-warning">9</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href ng-click="tast('+')" class="btn btn-warning">+</a>
+              </td>
+              <td>
+                <a href ng-click="tast('0')" class="btn btn-warning">0</a>
+              </td>
+              <td>
+              </td>
+            </tr>
+          </table>
+
+          <form ng-submit="nextStep()">
+            <div style="height:100px;">
+              <div>
+                  <table>
+                    <tr>
+                      <td>
+                        <input type="text" ng-model="data.phone" class="huge" />
+                      </td>
+                      <td>
+                        <span style="float:right;">
+                          <button type="button" ng-click="slettTegn()" ng-disabled="data.phone.length==0" class="btn btn-danger huge">&nbsp;&nbsp; ← &nbsp;&nbsp;</button>
+                          <button type="submit" ng-disabled="data.phone.length<8" class="btn btn-success huge">&nbsp;&nbsp; ✓ &nbsp;&nbsp;</button>
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </form>
+
+    </div>
+
+    <div class="slide" ng-if="step=='wait'">
+
+      <p align="center">
+        Sjekker...
+      </p>
+
+    </div>
+
+    <div class="slide" ng-if="step=='confirm'">
+          <h3>
+            {{header}}
+          </h3>
+
+          <p ng-hide="newuser">
+            Du er allerede registrert som låner, men hvis du ikke har lånekortet kan du fullføre utlånet ved å taste inn PIN-koden vi har sendt til mobilen din.
+          </p>
+          <p ng-show="newuser">
+            Vi har sendt deg en aktiveringskode. Skriv inn koden og fortsett for å fullføre utlånet.
+            <span ng-hide="data.name">P.S. Vi fant deg ikke i telefonkatalogen, men det går greit.</span>
+          </p>
+
+          <form ng-submit="nextStep()">
+
+            <div class="control-group">
+              <label for="nummer" class="control-label">Tlf. nr.</label>
+              <div class="controls">
+                <input id="nummer" type="text" class="input-large" ng-model="data.phone" />
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label">Bekreftelseskode</label>
+              <div class="controls">
+
+                <input id="bekreftelse" type="text" class="input-large" ng-model="data.code" />
+
+                <div id="bekreftelse-pad" style="position:absolute;height:1px;"><!-- small height to avoid capturing clicks -->
+
+                  <div style="position:relative; left: 230px; top: -30px; background:#fff; border: 1px solid #ccc; border-radius: 5px; padding: 10px; box-shadow: 1px 1px 2px #666;">
+                    <table class="numpad">
+                      <tr>
+                        <td>
+                          <a href ng-click="tast(1)" class="btn btn-warning">1</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(2)" class="btn btn-warning">2</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(3)" class="btn btn-warning">3</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a href ng-click="tast(4)" class="btn btn-warning">4</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(5)" class="btn btn-warning">5</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(6)" class="btn btn-warning">6</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a href ng-click="tast(7)" class="btn btn-warning">7</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(8)" class="btn btn-warning">8</a>
+                        </td>
+                        <td>
+                          <a href ng-click="tast(9)" class="btn btn-warning">9</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                          <a href ng-click="tast(0)" class="btn btn-warning">0</a>
+                        </td>
+                        <td>
+
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label for="personnavn" class="control-label">Navn</label>
+              <div class="controls">
+
+                <input id="personnavn" type="text" class="input-large" value="{{navn}}" ng-model="data.name" />
+
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="controls">
+                <label class="checkbox">
+                  <input type="checkbox" checked="checked" />
+                  Jeg samtykker til at jeg skal (forsøke å) være snill og grei
+                </label>
+                <button type="submit" class="btn btn-success huge">Fullfør</button>
+              </div>
+            </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="slide" ng-if="step=='writecard'">
+
+      <p align="center">
+
+        {{card_status}}
+
+      </p>
+
+    </div>
+
+    <div class="slide" ng-if="step=='checkout'">
+
+      <p align="center">
+
+        {{checkout_status}}
+
+      </p>
+
+    </div>
+
+     <div class="slide" ng-if="step=='complete'">
+
+      <p align="center" style="padding:10x; font-size:3em;" class="indie">
+
+          Hurra, utlånet var vellykka!
+
+      </p>
+      <p align="center" style="padding:10x;">
+
+        <button ng-click="myloans()" class="btn btn-primary huge">Vis mine lån</button>
+
+        <button ng-click="home()" class="btn btn-primary huge">Avslutt</button>
+
+      </p>
+
+    </div>
+
+
+  </div>
+</div>

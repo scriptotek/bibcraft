@@ -4,11 +4,6 @@ use Illuminate\Support\MessageBag;
 
 class User extends Eloquent {
 
-    public function loans()
-    {
-        return $this->hasMany('Loan');
-    }
-
     /**
      * Activation error message
      *
@@ -22,6 +17,12 @@ class User extends Eloquent {
 	 * @var string
 	 */
 	protected $table = 'users';
+
+
+    public function loans()
+    {
+        return $this->hasMany('Loan');
+    }
 
 	/**
      * Validate the activation code
@@ -47,10 +48,18 @@ class User extends Eloquent {
         return true;
     }
 
+    /**
+     * Check out a set of documents to the current user
+     *
+     * @param  Document[]  $documents
+     * @return array
+     */
     public function addLoans($documents)
     {
-    	$dt = new DateTime();
-        date_add($dt, date_interval_create_from_date_string('30 days'));
+    	$due = new DateTime();
+        date_add($due, date_interval_create_from_date_string('30 days'));
+
+        $response = array();
 
         foreach ($documents as $doc) {
 
@@ -61,8 +70,10 @@ class User extends Eloquent {
         	$loan = new Loan();
         	$loan->user_id = $this->id;
         	$loan->document_id = $doc->id;
-        	$loan->save();
+            $loan->due_at = $due;
+            $response[$doc->id] = $loan->save();
         }
+        return $response;
     }
 
 }

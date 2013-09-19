@@ -1,5 +1,9 @@
 <?php
 
+if (!extension_loaded('http')) {
+    dd("pecl_http is not installed"); // used for content negotiation
+}
+
 class UsersController extends BaseController {
 
 	/**
@@ -9,29 +13,47 @@ class UsersController extends BaseController {
 	 */
 	public function getIndex()
 	{
-        $users = User::with('loans')->get();
+		$users = User::with('loans')->get();
 
-        return Response::view('users.index', array(
-            'title' => 'Brukere',
-            'users' => $users
-        ));
+		return Response::view('users.index', array(
+			'title' => 'Brukere',
+			'users' => $users
+		));
 	}
 
-	public function getShow()
+	public function getShow($user_id = null)
 	{
-		dd(func_get_args());
 
-		if (Input::has('patron_id')) {
-			$patron_id = Input::get('patron_id');
-			$user = User::find($patron_id);
+		if ($user_id) {
+			$user = User::with('loans.document')->find($user_id);
+		} else if (Input::has('user_id')) {
+			$user_id = Input::get('user_id');
+			$user = User::with('loans.document')->find($user_id);
 		} else if (Input::has('phone')) {
 			$phone = Input::get('phone');
 			$phone = ($phone[0] == '+') ?: '+47' . $phone;
-			$user = User::where('phone','=',$phone)->first();
+			$user = User::with('loans.document')->where('phone','=',$phone)->first();
 		} else {
 			return Response::JSON(array('error' => 'insufficient data'));
 		}
-		return Response::JSON( $user );
+		if (!$user) {
+			return Response::JSON(array('error' => 'user not found'));
+		}
+
+        $content_types = array('application/json', 'text/html');
+        $content_type = http_negotiate_content_type($content_types);
+
+        if ($content_type == 'text/html') {
+
+	        return View::make('users.show', array(
+	        	'user' => $user
+	        ));
+
+        } else if ($content_type == 'application/json') {
+
+			return Response::JSON( $user );
+		}
+
 	}
 
 	/**
@@ -41,46 +63,45 @@ class UsersController extends BaseController {
 	 */
 	public function postStore()
 	{
-		$phone = Input::get('number');
-        if ($phone[0] != '+') {
-            $phone = '+47' . $phone;
-        }
-        $user = User::where('phone','=',$phone)->first();
-        if ($user) {
-        	return Response::JSON( array('error' => 'eksisterer allerede') );
-        }
+		$phone = Input::get('phone');
+		$phone = ($phone[0] == '+') ?: '+47' . $phone;
 
-        $dt = new DateTime();
-        date_sub($dt, date_interval_create_from_date_string('40 seconds'));
-        //$dt_str = $dt->format('Y-m-d H:i:s');
-        $user = User::where('created_at','>', $dt)->first();
-        if ($user) {
-        	return Response::JSON( array('error' => 'maks én ny bruker per 40 sek.') );
-        }
+		$user = User::where('phone','=',$phone)->first();
+		if ($user) {
+			return Response::JSON( array('error' => 'eksisterer allerede') );
+		}
 
-        $kode = '';
-        for ($i = 0; $i < 4; $i++) {
-            $kode .= strval(rand(0,9));
-        }
+		$dt = new DateTime();
+		date_sub($dt, date_interval_create_from_date_string('40 seconds'));
+		//$dt_str = $dt->format('Y-m-d H:i:s');
+		$user = User::where('created_at','>', $dt)->first();
+		if ($user) {
+			return Response::JSON( array('error' => 'maks én ny bruker per 40 sek.') );
+		}
 
-        $user = new User();
-        $user->phone = $phone;
-        $user->name = Input::get('name');
-        $user->activation_code = $kode;
-        $user->save();
+		$kode = '';
+		for ($i = 0; $i < 4; $i++) {
+			$kode .= strval(rand(0,9));
+		}
 
-        // Step 1: Declare new NexmoMessage.
-        $nexmo_sms = new NexmoMessage(Config::get('app.nexmo.apitoken'),
-        	                          Config::get('app.nexmo.apisecret'));
+		$user = new User();
+		$user->phone = $phone;
+		$user->name = Input::get('name');
+		$user->activation_code = $kode;
+		$user->save();
 
-        // Step 2: Use sendText( $to, $from, $message ) method to send a message.
-        $info = $nexmo_sms->sendText(
-            $phone,
-            'BibCraft',
-            'Hei! Din bekreftelseskode er: ' . $kode
-        );
+		// Step 1: Declare new NexmoMessage.
+		$nexmo_sms = new NexmoMessage(Config::get('app.nexmo.apitoken'),
+									  Config::get('app.nexmo.apisecret'));
 
-        return Response::JSON( array('error' => '', 'user_id' => $user->id, 'phone' => $phone));
+		// Step 2: Use sendText( $to, $from, $message ) method to send a message.
+		$info = $nexmo_sms->sendText(
+			$phone,
+			'BibCraft',
+			'Hei! Din bekreftelseskode er: ' . $kode
+		);
+
+		return Response::JSON( array('error' => '', 'user_id' => $user->id, 'phone' => $phone));
 	}
 
 	/**
@@ -90,84 +111,101 @@ class UsersController extends BaseController {
 	 */
 	public function getNewActivationCode()
 	{
-		$phone = Input::get('number');
-        if ($phone[0] != '+') {
-            $phone = '+47' . $phone;
-        }
-        $user = User::where('phone','=',$phone)->first();
-        if (!is_null($user->activated_at)) {
-        	return Response::JSON( array('error' => 'allerede aktivert') );
-        }
+		$phone = Input::get('phone');
+		$phone = ($phone[0] == '+') ?: '+47' . $phone;
 
-        $kode = '';
-        for ($i = 0; $i < 4; $i++) {
-            $kode .= strval(rand(0,9));
-        }
+		$user = User::where('phone','=',$phone)->first();
+		/*if (!is_null($user->activated_at)) {
+			return Response::JSON( array('error' => 'allerede aktivert') );
+		}*/
 
-        $user->activation_code = $kode;
-        $user->save();
+		$kode = '';
+		for ($i = 0; $i < 4; $i++) {
+			$kode .= strval(rand(0,9));
+		}
 
-        // Step 1: Declare new NexmoMessage.
-        $nexmo_sms = new NexmoMessage(Config::get('app.nexmo.apitoken'),
-        	                          Config::get('app.nexmo.apisecret'));
+		$user->activation_code = $kode;
+		$user->activated_at = null;
+		$user->save();
 
-        // Step 2: Use sendText( $to, $from, $message ) method to send a message.
-        $info = $nexmo_sms->sendText(
-            $phone,
-            'BibCraft',
-            'Hei! Din bekreftelseskode er: ' . $kode
-        );
+		// Step 1: Declare new NexmoMessage.
+		$nexmo_sms = new NexmoMessage(Config::get('app.nexmo.apitoken'),
+									  Config::get('app.nexmo.apisecret'));
 
-        return Response::JSON( array('error' => '', 'user_id' => $user->id, 'phone' => $phone));
+		// Step 2: Use sendText( $to, $from, $message ) method to send a message.
+		$info = $nexmo_sms->sendText(
+			$phone,
+			'BibCraft',
+			'Hei! Din bekreftelseskode er: ' . $kode
+		);
+
+		return Response::JSON( array('error' => '', 'user_id' => $user->id, 'phone' => $phone));
 	}
 
 	/**
 	 * Validate an activation code
+	 * Accepts JSON POST data. Example:
+	 *	 {"phone":"10000000", "code":"1234"}
 	 *
 	 * @return Response
 	 */
 	public function postActivate()
 	{
-		$phone = Input::get('number');
+		$phone = Input::get('phone');
+		$phone = ($phone[0] == '+') ?: '+47' . $phone;
 
-        $user = User::where('phone', $phone)->first();
-        if (!$user) {
-        	return Response::JSON(array('error' => 'unknown_user'));
-        }
+		$user = User::where('phone', $phone)->first();
+		if (!$user) {
+			return Response::JSON(array('error' => 'unknown_user'));
+		}
 
-        if (!$user->activate(Input::get('confirmation'))) {
-        	return Response::JSON(array('error' => $user->activation_error));
-        }
+		if (!$user->activate(Input::get('code'))) {
+			return Response::JSON(array('error' => $user->activation_error));
+		}
 
-        return Response::JSON( array('error' => '', 'user_id' => $user->id) );
+		return Response::JSON( array('error' => '', 'user_id' => $user->id) );
 	}
 
 	/**
 	 * Store a set of new loans for the current user in storage.
+	 * Accepts JSON POST data. Example:
+	 *	 {"user_id":5,"documents":[1,2]}
 	 *
 	 * @return Response
 	 */
 	public function postAddLoans()
 	{
-
-		$items = json_decode(Input::get('items'));
+		$items = Input::get('documents');
 		$docs = array();
 		foreach ($items as $item) {
-        	$docs[] = Document::find($item);
-        }
+			$doc = Document::find($item);
+			if (!$doc) {
+				return Response::JSON(array('error' => 'document ' . $item . ' does not exists'));
+			}
+			$docs[] = $doc;
+		}
 
-        $patron_id = Input::get('patron_id');
+		$user_id = Input::get('user_id');
 
-        $user = User::find($patron_id);
-        $user->addLoans($docs);
+		$user = User::find($user_id);
+		if (!$user) {
+			return Response::JSON(array('error' => 'user does not exists'));
+		}
+		$response = $user->addLoans($docs);
 
-        return Response::JSON(array('error' => '', 'user_id' => $patron_id, 'loans' => $items));
+		return Response::JSON(array('error' => '', 'user_id' => $user_id, 'documents' => $response));
 	}
 
 	public function getLoans($id)
 	{
-		$user = User::with('loans.document.object')->find($id);
-		return Response::JSON($user->loans);
+		$user = User::with('loans.document')->find($id);
+		if (!$user) {
+			return Response::JSON(array('error' => 'user does not exists'));
+		}
+		return Response::JSON(array(
+			'user_id' => $id,
+			'loans' => $user->loans->toArray()
+		));
 	}
 
 	/**
@@ -214,8 +252,8 @@ class UsersController extends BaseController {
 		$user = User::find($id);
 
 		return View::make('users.delete')
-            ->with('title', 'Slette bruker?')
-            ->with('user', $user);
+			->with('title', 'Slette bruker?')
+			->with('user', $user);
 	}
 
 	/**
@@ -246,12 +284,12 @@ class UsersController extends BaseController {
 		$user = User::find($id);
 
 		return View::make('users.edit')
-            ->with('title', 'Rediger bruker')
-            ->with('formData', array(
-                        'action' => array('UsersController@putUpdate', $user->id),
-                        'method' => 'PUT',
-                        'class' => 'form-horizontal'))
-            ->with('user', $user);
+			->with('title', 'Rediger bruker')
+			->with('formData', array(
+						'action' => array('UsersController@putUpdate', $user->id),
+						'method' => 'PUT',
+						'class' => 'form-horizontal'))
+			->with('user', $user);
 	}
 
 	/**

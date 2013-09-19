@@ -1,0 +1,38 @@
+
+<div class="wizard">
+
+	<div style="padding:20px;">
+
+		<a href="#/" class="btn btn-large btn-primary" style="float:right; margin:20px;">
+			Låne noe?
+		</a>
+
+		<h2>BibCraft : Realfagsbibliotekets mobile utlånssystem</h2>
+		<h3>Hei {{user.name}}</h3>
+		<p>
+			Du har {{user.loans.length}} lån
+		</p>
+
+		<div ng-show="error" style="color:white; font-size:3em; background:red; padding:1em; border-radius:.3em;">
+			{{error}}
+		</div>
+
+		<ul class="books" style="list-style-type:none;">
+
+			<li class="book" ng-repeat="loan in user.loans">
+
+				<div style="float:left; width:160px; height: 160px; margin:3px 8px;">
+					<img ng-src="{{loan.document.cover}}" style="max-height: 160px; max-width: 160px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">
+				</div>
+				<strong class="title">{{loan.document.title}} {{loan.document.subtitle }}</strong>
+				<span class="publisher">({{loan.document.publisher }} {{loan.document.year}})</span>
+					<br />
+				Av: {{loan.document.authors}}<br />
+				Utlånt: {{ loan.created_at | date:'mediumDate' }}<br />
+				Leveres innen: {{ loan.due_at | date:'mediumDate' }}
+			</li>
+
+		</ul>
+	</div>
+
+</div>

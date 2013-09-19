@@ -29,9 +29,6 @@
 		],
 		"post-create-project-cmd": [
 			"php artisan key:generate"
-		],
-		"post-create-project-cmd": [
-			"mkdir app/storage/covers"
 		]
 	},
 	"config": {

@@ -5,12 +5,16 @@
   <title>BIBCRAFT - Selvbetjening</title>
   <base href="/selfservice">
   <link href='//fonts.googleapis.com/css?family=Noto+Sans|Share+Tech+Mono' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Noto+Sans' rel='stylesheet' type='text/css'>
+
   <link href="/vendor/bootstrap/css/bootstrap.min.css" media="screen" type="text/css" rel="stylesheet" />
   <link href="/app/selfservice/selfservice.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
 
-  <div class="view" ng-view></div>
+  <h2 style="padding-left:20px;">BibCraft : Realfagsbibliotekets eksperimentelle og mobile utlånssystem</h2>
+
+  <div class="view" ng-view ng-cloak></div>
 
   <footer ng-controller="AppController" ng-click="toggleLog()">
     <div class="container">
@@ -40,12 +44,15 @@
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-touch.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-animate.min.js"></script>
 
   <script src="/app/app.js"></script>
+  <script src="/app/collection/collection.js"></script>
   <script src="/app/selfservice/services.js"></script>
-  <script src="/app/selfservice/index/controller.js"></script>
-  <script src="/app/selfservice/cart/controller.js"></script>
-  <script src="/app/collection/controller.js"></script>
+  <script src="/app/selfservice/index/index.js"></script>
+  <script src="/app/selfservice/cart/cart.js"></script>
+  <script src="/app/selfservice/checkout/checkout.js"></script>
+  <script src="/app/selfservice/user/user.js"></script>
 
   <script type='text/javascript'>
     $(document).ready(function () {

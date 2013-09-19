@@ -1,0 +1,44 @@
+
+<div class="wizard">
+	<div style="padding:20px;">
+
+		<div id="borrowing-cart">
+
+			<div class="item" ng-repeat="book in books">
+				<table>
+					<tr>
+						<td>
+							<img class="cover" ng-src="/documents/cover/{{book.catalogueData.id}}" alt="Omslagsbilde" />
+						</td>
+						<td>
+							<span class="field title">{{book.catalogueData.title}} {{book.catalogueData.subtitle}}</span>
+							<span class="field pubyear">{{book.catalogueData.year}}</span>
+							<br />
+							<span class="field author">{{book.catalogueData.authors}}</span>
+						</td>
+					</tr>
+				</table>
+			</div>
+
+		</div>
+
+		<div style="text-align: center; padding: 20px 0px 0px 0px;">
+
+			<div style="padding:10px;">
+				<a href ng-show="books.length" ng-click="continue()" class="btn btn-large btn-success">Lån
+					<ng-pluralize count="books.length" when="{'one': 'boka', 'other': 'bøkene'}"></ng-pluralize>
+				</a>
+				<a href ng-click="cancel()" class="btn btn-large btn-danger">Avbryt</a>
+			</div>
+
+			<p style="padding:10px;" ng-show="books.length">
+				(eller skann flere)
+			</p>
+			<p style="padding:10px;" ng-hide="books.length">
+				(eller skann noe du vil låne)
+			</p>
+
+		</div>
+
+	</div>
+</div>
