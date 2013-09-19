@@ -30,7 +30,7 @@
 
   <p style="float:right">
     Viser {{$from}}-{{$to}} av {{$total}}.
-    Vis {{ Form::select('perPage', array('5' => '5', '10' => '10', '25' => '25', '50' => '50'), Input::get('itemsPerPage', '10'), array('id' => 'perPage', 'style' => 'width:60px;')) }}
+    Vis {{ Form::select('perPage', array('5' => '5', '10' => '10', '25' => '25', '50' => '50', '100' => '100'), Input::get('itemsPerPage', Session::get('itemsPerPage', '10')), array('id' => 'perPage', 'style' => 'width:60px;')) }}
     per side
   </p>
 
@@ -67,6 +67,17 @@
         @endforeach
       @endif
       <br />
+
+      Omslagsbilde: <?php
+      list($width, $height) = @getimagesize( URL::action('DocumentsController@getCover', $obj->id) );
+      if ($width) {
+        echo $width . ' x ' . $height . ' px';
+      } else {
+        echo '<em>Mangler</em>';
+      }
+      ?>
+      <br />
+
 
       <a href="{{ URL::action('DocumentsController@getEdit', $obj->id) }}"><i class="icon-pencil"></i> rediger</a>
       <a href="{{ URL::action('DocumentsController@getDelete', $obj->id) }}"><i class="icon-trash"></i> slett</a>
