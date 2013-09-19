@@ -1,14 +1,24 @@
 <div class="wizard">
   <div style="padding:20px;">
 
-    <div class="slides2" style="position:relative;width:100%;">
+    <div class="slides2" style="position:relative;width:100%; height: 600px;">
 
-    <div class="slide" ng-if="step=='start'">
+      <div>
 
-          <h3>
-            Har du lånekort fra før? Skann kortet nå.<br />
+      <div class="slide" ng-if="step=='start'">
+
+        <div style="padding: 10px 180px;">
+
+          <h3 style="padding:20px 0;">
+            <span style="color:blue;">Har du lånekort fra før? Skann kortet nå.</span><br />
             Hvis ikke, tast inn telefonnummeret ditt.
           </h3>
+
+          <form ng-submit="nextStep()" style="float:right;">
+            <input type="text" ng-model="data.phone" class="huge" /><br />
+            <button type="button" ng-click="slettTegn()" ng-disabled="data.phone.length==0" class="btn btn-danger huge">&nbsp;&nbsp; ← &nbsp;&nbsp;</button>
+            <button type="submit" ng-disabled="data.phone.length<8" class="btn btn-success huge">&nbsp;&nbsp; ✓ &nbsp;&nbsp;</button>
+          </form>
 
           <table class="numpad">
             <tr>
@@ -56,32 +66,14 @@
             </tr>
           </table>
 
-          <form ng-submit="nextStep()">
-            <div style="height:100px;">
-              <div>
-                  <table>
-                    <tr>
-                      <td>
-                        <input type="text" ng-model="data.phone" class="huge" />
-                      </td>
-                      <td>
-                        <span style="float:right;">
-                          <button type="button" ng-click="slettTegn()" ng-disabled="data.phone.length==0" class="btn btn-danger huge">&nbsp;&nbsp; ← &nbsp;&nbsp;</button>
-                          <button type="submit" ng-disabled="data.phone.length<8" class="btn btn-success huge">&nbsp;&nbsp; ✓ &nbsp;&nbsp;</button>
-                        </span>
-                      </td>
-                    </tr>
-                  </table>
-                </div>
-              </div>
-            </form>
+        </div>
 
     </div>
 
     <div class="slide" ng-if="step=='wait'">
 
-      <p align="center">
-        Sjekker...
+      <p style="text-align:center;font-size:3em;padding:80px;">
+        Titter i telefonkatalogen...
       </p>
 
     </div>
@@ -160,6 +152,8 @@
                         </td>
                         <td>
 
+                          <button type="button" ng-click="slettTegn()" ng-disabled="data.code.length==0" class="btn btn-danger">←</button>
+
                         </td>
                       </tr>
                     </table>
@@ -190,11 +184,10 @@
 
         </form>
       </div>
-    </div>
 
     <div class="slide" ng-if="step=='writecard'">
 
-      <p align="center">
+      <p style="text-align:center;font-size:3em;padding:80px; line-height: 200%;">
 
         {{card_status}}
 
@@ -204,9 +197,15 @@
 
     <div class="slide" ng-if="step=='checkout'">
 
-      <p align="center">
+      <p style="text-align:center;font-size:3em;padding:80px;">
 
         {{checkout_status}}
+
+      </p>
+
+      <p style="text-align:center;font-size:3em;padding:80px;">
+
+        <a href="#/index" ng-show="checkout_error" class="btn huge">Tilbake</a>
 
       </p>
 
@@ -214,21 +213,20 @@
 
      <div class="slide" ng-if="step=='complete'">
 
-      <p align="center" style="padding:10x; font-size:3em;" class="indie">
+      <p style="text-align:center;font-size:3em;padding:80px;">
 
-          Hurra, utlånet var vellykka!
+        Hurra, utlånet var vellykka!
 
       </p>
-      <p align="center" style="padding:10x;">
 
+      <p style="text-align:center;font-size:3em;padding:80px;">
         <button ng-click="myloans()" class="btn btn-primary huge">Vis mine lån</button>
-
         <button ng-click="home()" class="btn btn-primary huge">Avslutt</button>
-
       </p>
 
     </div>
 
-
   </div>
+</div>
+</div>
 </div>

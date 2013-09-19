@@ -12,7 +12,6 @@
 				// The return value gets picked up by the then in the controller.
 				if (response.data.documents) {
 					for (var i = 0; i < response.data.documents.length; i++) {
-						response.data.documents[i].cover = '/documents/cover/' + response.data.documents[i].id;
 						response.data.documents[i].available = (response.data.documents[i].loans == 0);
 					}
 				}

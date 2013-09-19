@@ -8,6 +8,8 @@
 
 	var CartController = function($scope, $location, WebService, LogService, CartService) {
 
+		$scope.cart_error = 'Ingen feil';
+
 		WebService.connect('ws://labs.biblionaut.net:8080');
 
 		function found_book(item) {
@@ -56,6 +58,9 @@
 
 			console.log('> on Cart changed, cart contains ' + $scope.books.length + ' items');
 
+			// Propagate error
+			$scope.cart_error = CartService.last_error;
+
 			if ($scope.books.length > 0) {
 				$('#borrowing-cart .item:last').slideDown('fast', function() {
 					var $t = $('#borrowing-cart');
@@ -93,6 +98,8 @@
 		// Keeps the contents of the cart
 		this.contents = [];
 
+		this.last_error = '';
+
 		// Clears the cart
 		this.clear = function() {
 			this.contents = [];
@@ -120,10 +127,14 @@
 				if (d.error) {
 
 					LogService.log('Boka ble ikke funnet i BibCraft-systemet: ' + d.error, 'error');
+					that.last_error = 'Boka ble ikke funnet i BibCraft-systemet';
+					$rootScope.$broadcast('cartChanged');
 
 				} else if (d.loans.length !== 0) {
 
 					LogService.log('Boka er allerede utlånt!', 'error');
+					that.last_error = 'Boka er allerede utlånt';
+					$rootScope.$broadcast('cartChanged');
 
 					// TODO: Gå til ny skjerm og vis utlånsfrist :)
 
@@ -136,6 +147,7 @@
 
 					// Broadcast an event
 					console.log(':: Broadcast : Cart changed')
+					that.last_error = '';
 					$rootScope.$broadcast('cartChanged');
 
 				}

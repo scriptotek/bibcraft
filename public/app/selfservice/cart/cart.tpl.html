@@ -2,6 +2,10 @@
 <div class="wizard">
 	<div style="padding:20px;">
 
+		<p ng-if="cart_error" style="border-radius: 8px; background:red;color:white;padding:20px;margin:20px;">
+			{{cart_error}}
+		</p>
+
 		<div id="borrowing-cart">
 
 			<div class="item" ng-repeat="book in books">

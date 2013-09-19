@@ -11,10 +11,14 @@ body {
   margin: 0;
   padding: 0;
   overflow:hidden;
-  /*cursor: none;*/
-  /*
-  */
   /* The html and body elements cannot have any padding or margin. */
+}
+* {
+  cursor: none !important;
+}
+
+a:not(.btn), a:link:not(.btn), a:hover:not(.btn), a:visited:not(.btn)  {
+  color: #0088CC; !important;
 }
 h2, h3, .indie {
 
@@ -98,6 +102,14 @@ a:link, a:visited {
   margin: 0 auto -28px;
 }
 
+.wizard .books {
+  height: 650px;
+  overflow-y:auto;
+}
+.wizard .book {
+  clear: both;
+}
+
 /* Set the fixed height of the footer here */
 #push,
 footer {
@@ -110,7 +122,8 @@ footer {
   color: #888;
 }
 footer, footer * {
-    font-family: 'Share Tech Mono', sans-serif;
+  font-family: 'Share Tech Mono', sans-serif;
+  overflow:hidden;
 }
 
 .container {
@@ -202,6 +215,9 @@ header h3 {
   -moz-transition: all .5s ease-in-out;
   -o-transition: all .5s ease-in-out;
   transition: all .5s ease-in-out;
+}
+.slide {
+
 }
 .inner-small {
   width: 70%;

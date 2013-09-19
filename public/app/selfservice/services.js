@@ -8,9 +8,12 @@ angular.module('bibcraft.selfservice.services', [])
 		this.connection = null;
 
 		this.send = function(args) {
-				var s = JSON.stringify(args);
-				LogService.log('SEND: ' + s);
-				this.connection.send(s);
+			console.log('> send 1');
+			var s = JSON.stringify(args);
+			console.log('>>> send 2');
+			LogService.log('SEND: ' + s);
+			console.log('>>> send 3');
+			this.connection.send(s);
 		};
 
 		this._reconnect = function(url) {

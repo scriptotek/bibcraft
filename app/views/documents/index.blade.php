@@ -68,12 +68,16 @@
       @endif
       <br />
 
-      Omslagsbilde: <?php
-      list($width, $height) = @getimagesize( URL::action('DocumentsController@getCover', $obj->id) );
-      if ($width) {
-        echo $width . ' x ' . $height . ' px';
-      } else {
-        echo '<em>Mangler</em>';
+      <?php
+      if (intval(Input::get('itemsPerPage', Session::get('itemsPerPage', '10'))) < 50) {
+        list($width, $height) = @getimagesize( URL::action('DocumentsController@getCover', $obj->id) );
+        echo 'Omslagsbilde: ';
+        if ($width) {
+          echo $width . ' x ' . $height . ' px';
+        } else {
+          echo '<em>Mangler</em>';
+        }
+        echo '<br />';
       }
       ?>
       <br />

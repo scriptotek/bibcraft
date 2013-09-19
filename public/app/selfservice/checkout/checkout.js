@@ -55,7 +55,7 @@
 
 			LogService.log('Sjekker om ' + tlfnr + ' allerede er registrert');
 
-			$http.get('/users/show/?phone=' + tlfnr)
+			$http.get('/users/show?phone=' + tlfnr)
 				.error(function(response) {
 					LogService.log('Http request failed!', 'error');
 				})
@@ -96,7 +96,7 @@
 		 * Prøver å slå opp telefonnummer i ekstern katalog
 		 */
 		function phoneNumberLookup(tlfnr) {
-			$http.get('//services2.biblionaut.net/phone_number_lookup.php?number=' + tlfnr)
+			$http.jsonp('//services2.biblionaut.net/phone_number_lookup.php?callback=JSON_CALLBACK&number=' + tlfnr)
 				.error(function() {
 					LogService.log('Http request failed!', 'error');
 				})
@@ -109,6 +109,7 @@
 						LogService.log('Klarte ikke å slå opp telefonnummeret', 'error');
 						$scope.data.name = '';
 					} else {
+						LogService.log('Fant navn: ' + pname);
 						$scope.data.name = pname;
 					}
 
@@ -126,7 +127,7 @@
 					LogService.log('Http request failed!', 'error');
 				})
 				.success(function (response) {
-					LogService.log('Brukeren ble lagret');
+					LogService.log('Brukeren ble opprettet');
 					if ($scope.data.name == '') {
 						// We got no name. Should we care?
 					}
@@ -167,16 +168,18 @@
 
 		function completeCheckout() {
 			$scope.step = 'checkout';
-			$scope.checkout_status = 'Et øyeblikk, lagrer lån';
+			$scope.checkout_status = 'Et øyeblikk... Lagrer lån...';
+			$scope.checkout_error = false;
 
 			console.log('------- CHECKOUT -----------');
-			console.log(CartService.contents);
-			console.log(user_id);
-
 			if (CartService.contents.length == 0) {
+				LogService.log('Du har ikke valgt noen bøker','error');
 				$scope.checkout_status = 'Du har ikke valgt noen bøker';
+				$scope.checkout_error = true;
 				return;
 			}
+			console.log(CartService.contents);
+			console.log(user_id);
 
 			if (user_id == -1) {
 				$scope.checkout_status = 'Du er ikke identifisert';
@@ -185,7 +188,7 @@
 
 			var document_ids = [];
 			for (var i = CartService.contents.length - 1; i >= 0; i--) {
-				document_ids.push(CartService.contents[i].catalogueData.id);
+				document_ids.push(parseInt(CartService.contents[i].catalogueData.id, 10));
 			};
 
 			var postData = {
@@ -214,7 +217,7 @@
 		/**
 		 * Skriver nytt lånekort
 		 */
-		function writeCard() {
+		function writeCard(uid) {
 			LogService.log('Skriver til kort, vennligst vent...');
 			WebService.send({
 				rcpt: 'backend',
@@ -264,22 +267,30 @@
 					LogService.log('Kortet er blankt', 'warn');
 					if ($scope.step == 'writecard') {
 						$scope.card_status = 'Skriver til kortet... Ikke fjern det enda!';
-						writeCard(data.uid);
+						$scope.$apply(writeCard(data.uid));
 					}
 
 				} else if (data.item.usage_type == 'patron-card') {
 
-					console.log('Found patron card');
-					console.log(data.item);
-					$scope.$apply(foundPatronCard(data.item));
+					if ($scope.step == 'start') {
+
+						console.log('Found patron card');
+						console.log(data.item);
+						$scope.$apply(foundPatronCard(data.item));
+
+					} else if ($scope.step == 'writecard') {
+
+						LogService.log('Kortet er ikke blankt!', 'error');
+
+					}
 
 				}
 			} else if (data.msg == 'card-written') {
 
-				LogService.log('Skriving til kort ferdig');
+				LogService.log('Gratulerer, kortet er ferdig!');
 				if ($scope.step == 'writecard') {
 					$scope.card_status = 'Gratulerer, lånekortet ditt er ferdig. Du kan nå fjerne det.';
-					$scope.step = 'checkout';
+					$scope.$apply(completeCheckout());
 				}
 
 			}
