@@ -19,7 +19,7 @@ class CreateDocumentsTable extends Migration {
 			$table->string('bibsys_knyttid')->nullable()->unique();
 			$table->string('bibsys_objektid');
 
-            $table->string('isbn')->nullable()->unique();
+            $table->string('isbn')->nullable();
             $table->string('publisher');
             $table->string('title');
             $table->string('subtitle')->nullable();
