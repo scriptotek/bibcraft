@@ -33,7 +33,16 @@ class DocumentsController extends BaseController {
             $collections[$c->id] = $c->name;
         }
 
-        $itemsPerPage = Input::get('itemsPerPage', 10);
+
+        $itemsPerPage = Input::get('itemsPerPage', Session::get('itemsPerPage', 10));
+
+        if ($itemsPerPage) {
+            Session::put('itemsPerPage', $itemsPerPage);
+        }
+
+        if (Input::get('page')) {
+            Session::put('page', Input::get('page'));
+        }
 
         if ($collectionId) {
             $collection = Collection::find($collectionId);
