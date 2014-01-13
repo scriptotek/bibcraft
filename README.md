@@ -1,13 +1,18 @@
 BIBCRAFT
 ============
 
-Festivalbibliotekssytem
+Bibcraft er Realfagsbibliotekets eksperimentelle og mobile utlånssystem.
+Bygget på Laravel og AngularJS.
 
 Oppsett:
 
     composer install
     php artisan migrate
-    sudo chown -R www-data:www-data app/storage
-    sudo chown -R www-data:www-data app/database 
-    sudo pecl install pecl_http
 
+Hvilken samling som vises på selvbetjeningsautomaten settes ved å opprette filen `public/config.json`:
+
+    {
+        "activeCollection": 2
+    }
+
+Du kan evt. kopiere `public/config.dist.json`
