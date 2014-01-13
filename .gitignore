@@ -1,6 +1,6 @@
-/bootstrap/compiled.php
-/vendor
-composer.phar
-composer.lock
-/public/covers
-/public/config.json
+/client/bootstrap/compiled.php
+/client/vendor
+/client/composer.phar
+/client/composer.lock
+/client/public/covers
+/client/public/config.json
