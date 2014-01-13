@@ -20,6 +20,14 @@
 			}, 50); // to prevent Cannot read property '$$nextSibling' of null on onmessage
 		}
 
+		$scope.dummy = function() {
+			console.log('Oi!');
+			CartService.add({id:'039970NAA'});
+			$timeout(function() {
+				$location.path('/cart');
+			}, 50);
+		}
+
 		function onWebSocketMessageReceived(e, msg) {
 
 			//console.log("New Message: " + msg);

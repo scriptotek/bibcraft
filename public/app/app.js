@@ -28,9 +28,19 @@ angular.module('bibcraft', ['ngRoute', 'ngAnimate',
   	//	.html5Mode(false);
 }])
 
-.controller('AppController', ['$scope', 'LogService', function(sc, LogService) {
+.controller('AppController', ['$scope', 'LogService', function($scope, LogService) {
 
-	sc.toggleLog = function() {
+  $scope.network_error = false;
+
+  $scope.$on('requestFailed', function (e, msg) {
+    $scope.network_error = true;
+  });
+
+  $scope.$on('requestSuccessful', function (e, msg) {
+    $scope.network_error = false;
+  });
+
+	$scope.toggleLog = function() {
   		LogService.toggleLog();
   	};
 
@@ -71,5 +81,40 @@ angular.module('bibcraft', ['ngRoute', 'ngAnimate',
 	    }
 	    $('footer .container').scrollTop($("footer .container")[0].scrollHeight);
   	};
+
+}])
+
+
+/*******************************************************************************************
+ * HttpService provides some extensions to $http
+ *******************************************************************************************/
+.service('HttpService', ['$rootScope', '$http', '$q', '$timeout', 'LogService', function($rootScope, $http, $q, $timeout, LogService) {
+
+    this.neverEverGiveUp = function (options) {
+
+      if (options.timeout === undefined) {
+        options.timeout = 5000;
+      }
+
+      var deferred = $q.defer();
+
+      function attempt() {
+        LogService.log('Kontakter ' + options.url);
+        $http(options)
+          .success(function (response) {
+            LogService.log('Request successful');
+            $rootScope.$broadcast('requestSuccessful');
+            deferred.resolve(response);
+          })
+          .error(function (response) {
+            LogService.log('Request failed, retrying in three seconds...', 'error');
+            $rootScope.$broadcast('requestFailed');
+            $timeout(attempt, 3000);
+          });
+      }
+      attempt();
+
+      return deferred.promise;
+    };
 
 }]);

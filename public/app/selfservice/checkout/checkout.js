@@ -6,7 +6,7 @@
 	 * CheckoutController controls the user identification and checkout view
 	 *******************************************************************************************/
 
-	var CheckoutController = function($scope, $location, $http, LogService, WebService, CartService) {
+	var CheckoutController = function($scope, $location, LogService, WebService, CartService, HttpService) {
 
 		var user_id = -1;
 
@@ -55,11 +55,8 @@
 
 			LogService.log('Sjekker om ' + tlfnr + ' allerede er registrert');
 
-			$http.get('/users/show?phone=' + tlfnr)
-				.error(function(response) {
-					LogService.log('Http request failed!', 'error');
-				})
-				.success(function (response) {
+			HttpService.neverEverGiveUp({ method: 'GET', url: '/users/show?phone=' + tlfnr })
+				.then(function (response) {
 					if (response.id) {
 
 						LogService.log('Det finnes allerede en registrert bruker med dette telefonnummeret!', 'warn');
@@ -81,11 +78,8 @@
 		 * Sender en ny aktiveringskode til en allerede registrert bruker
 		 */
 		function sendNewActivationCode(tlfnr) {
-			$http.get('/users/new-activation-code?phone=' + tlfnr)
-				.error(function() {
-					LogService.log('Http request failed!', 'error');
-				})
-				.success(function (response) {
+			HttpService.neverEverGiveUp({ method: 'GET', url: '/users/new-activation-code?phone=' + tlfnr })
+				.then(function (response) {
 					LogService.log('Ny aktiveringskode sendt.');
 					$scope.header = 'Verifisér bruker';
 					$scope.step = 'confirm';
@@ -96,11 +90,8 @@
 		 * Prøver å slå opp telefonnummer i ekstern katalog
 		 */
 		function phoneNumberLookup(tlfnr) {
-			$http.jsonp('//services2.biblionaut.net/phone_number_lookup.php?callback=JSON_CALLBACK&number=' + tlfnr)
-				.error(function() {
-					LogService.log('Http request failed!', 'error');
-				})
-				.success(function (response) {
+			HttpService.neverEverGiveUp({ method: 'GET', url: '//services2.biblionaut.net/phone_number_lookup.php?number=' + tlfnr, timeout: 10000 })
+				.then(function (response) {
 
 					// decode html entities in a funny way:
 					var pname = $('<div />').html(response.personname).text();
@@ -122,11 +113,8 @@
 		 * Lagrer en ny bruker i databasen
 		 */
 		function storeUser (data) {
-			$http.post('/users/store', data)
-				.error(function(response) {
-					LogService.log('Http request failed!', 'error');
-				})
-				.success(function (response) {
+			HttpService.neverEverGiveUp({ method: 'POST', url: '/users/store', data: data })
+				.then(function (response) {
 					LogService.log('Brukeren ble opprettet');
 					if ($scope.data.name == '') {
 						// We got no name. Should we care?
@@ -141,11 +129,8 @@
 		function checkActivationCode(data) {
 			LogService.log('Sjekker koden');
 
-			$http.post('/users/activate', data)
-				.error(function(response) {
-					LogService.log('Http request failed!', 'error');
-				})
-				.success(function (response) {
+			HttpService.neverEverGiveUp({ method: 'POST', url: '/users/activate', data: data })
+				.then(function (response) {
 					if (response.error != "") {
 						LogService.log(response.error, 'error');
 						if (response.error == 'invalid_code') {
@@ -197,8 +182,9 @@
 			};
 			console.log(postData);
 
-			$http.post('/users/add-loans', postData)
-				.success(function (response) {
+
+			HttpService.neverEverGiveUp({ method: 'POST', url: '/users/add-loans', data: postData })
+				.then(function (response) {
 					// The then function here is an opportunity to modify the response
 					console.log('got response');
 					console.log(response);
@@ -206,10 +192,6 @@
 					$scope.checkout_status = 'Utlånet var vellykket!';
 					$scope.step = 'complete';
 					//$location.path('/users/' + user_id);
-				})
-				.error(function(response) {
-					console.log('request failed!');
-					LogService.log('Http request failed!', 'error');
 				});
 
 		}
@@ -301,7 +283,7 @@
 
 	};
 
-	CheckoutController.$inject = ['$scope', '$location', '$http', 'LogService', 'WebService', 'CartService'];
+	CheckoutController.$inject = ['$scope', '$location', 'LogService', 'WebService', 'CartService', 'HttpService'];
 
 	angular.module('bibcraft.selfservice.checkout', ['ngLocale', 'ngAnimate', 'bibcraft.selfservice.services'])
 	  .controller('CheckoutController', CheckoutController);

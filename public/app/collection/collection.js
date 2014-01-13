@@ -2,9 +2,26 @@
 
 	'use strict';
 
-	var CollectionService = function($q, $http) {
+	var CollectionService = function($q, $http, LogService) {
 
-		this.getBooks = function(collectionId, page, itemsPerPage, LogService) {
+		this.getActiveCollection = function() {
+
+			var promise = $http({method: 'GET', cache: true, url: '/config.json'})
+			.then(function (response) {
+				if (response.data.activeCollection) {
+					LogService.log('Viser samling: ' + response.data.activeCollection, 'info');
+					return response.data.activeCollection;
+				}
+				return -1;
+			}, function(response) {
+				LogService.log('Http request failed!', 'error');
+				return $q.reject(response);
+			});
+
+			return promise;
+		};
+
+		this.getBooks = function(collectionId, page, itemsPerPage) {
 
 			var promise = $http({method: 'GET', cache: true, url: '/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page})
 			.then(function (response) {
@@ -29,54 +46,64 @@
 
 	var CollectionController = function($scope, $location, $routeParams, CollectionService) {
 
-		var collection = 1,
+		var collection = -1,
 			page = 1,
 			lastPage = 1,
 			itemsPerPage = 6;
 
-		if ($routeParams.collection !== undefined) {
-			collection = parseInt($routeParams.collection, 10);
-		}
+		var init = function() {
+			console.log('View: collection=' + collection + ', page=' + page + ', itemsPerPage=' + itemsPerPage);
+
+			$scope.books = [];
+
+			CollectionService.getBooks(collection, page, itemsPerPage).then(function(d) {
+
+				if (d.error) {
+					$scope.error = d.error;
+				} else {
+					console.log('Got ' + d.documents.length + ' books');
+					$scope.books = d.documents;
+					lastPage = d.lastPage;
+				}
+
+			});
+
+			$scope.prevPage = function() {
+				console.log('goto prev page');
+				var prevPage = page - 1;
+				if (prevPage == 0) prevPage = lastPage;
+				console.log('Goto prev page: ' + prevPage);
+				$location.path('/browse/' + prevPage);
+			}
+
+			$scope.nextPage = function() {
+				var nextPage = page + 1;
+				if (nextPage > lastPage) nextPage = 1;
+				console.log('Goto next page: ' + nextPage);
+				$location.path('/browse/' + nextPage);
+			}
+		};
+
 		if ($routeParams.page !== undefined) {
 			console.log("HAVE PAGE");
 			page = parseInt($routeParams.page, 10);
 		}
+
 		if ($routeParams.itemsPerPage !== undefined) {
 			itemsPerPage = parseInt($routeParams.itemsPerPage, 10);
 		}
 
-		console.log('View: collection=' + collection + ', page=' + page + ', itemsPerPage=' + itemsPerPage);
-
-		$scope.books = [];
-
-		CollectionService.getBooks(collection, page, itemsPerPage).then(function(d) {
-
-			if (d.error) {
-				$scope.error = d.error;
-			} else {
-				console.log('Got ' + d.documents.length + ' books');
-				$scope.books = d.documents;
-				lastPage = d.lastPage;
-			}
-
-		});
-
-		$scope.prevPage = function() {
-			console.log('goto prev page');
-			var prevPage = page - 1;
-			if (prevPage == 0) prevPage = lastPage;
-			console.log('Goto prev page: ' + prevPage);
-			$location.path('/browse/' + prevPage);
+		if ($routeParams.collection !== undefined) {
+			collection = parseInt($routeParams.collection, 10);
+			init();
+		} else {
+			CollectionService.getActiveCollection(). then(function(c) {
+				collection = c;
+				init();
+			})
 		}
 
-		$scope.nextPage = function() {
-			var nextPage = page + 1;
-			if (nextPage > lastPage) nextPage = 1;
-			console.log('Goto next page: ' + nextPage);
-			$location.path('/browse/' + nextPage);
-		}
-
-	}
+	};
 
 	CollectionService.$inject = ['$q', '$http', 'LogService'];
 	CollectionController.$inject = ['$scope', '$location', '$routeParams', 'CollectionService'];

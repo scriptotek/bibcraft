@@ -93,7 +93,9 @@
 	 * CartService keeps books until checkout is complete
 	 *******************************************************************************************/
 
-	var CartService = function($rootScope, $q, $http, LogService) {
+	var CartService = function($rootScope, LogService, HttpService) {
+
+		var that = this;
 
 		// Keeps the contents of the cart
 		this.contents = [];
@@ -115,63 +117,48 @@
 
 		// Add an item using RFID card data
 		this.add = function(cardData) {
-			var that = this;
 			if (this.has(cardData.id)) {
 				console.log('Already in cart: ' + cardData.id);
 				return;
 			}
 			console.log('Added to cart : ' + cardData.id);
-			this.fetchMetadata(cardData.id).then(function(d) {
-				console.log('Got some metadata back');
-				console.log(d);
-				if (d.error) {
 
-					LogService.log('Boka ble ikke funnet i BibCraft-systemet: ' + d.error, 'error');
-					that.last_error = 'Boka ble ikke funnet i BibCraft-systemet';
-					$rootScope.$broadcast('cartChanged');
+			HttpService.neverEverGiveUp({ method: 'GET', url: '/documents/show/' + cardData.id })
+				.then(function(d) {
+					console.log('-------');
+					console.log('Got some metadata back');
+					console.log(d);
+					console.log('-------');
+					if (d.error) {
 
-				} else if (d.loans.length !== 0) {
+						LogService.log('Boka ble ikke funnet i BibCraft-systemet: ' + d.error, 'error');
+						that.last_error = 'Boka ble ikke funnet i BibCraft-systemet';
+						$rootScope.$broadcast('cartChanged');
 
-					LogService.log('Boka er allerede utlånt!', 'error');
-					that.last_error = 'Boka er allerede utlånt';
-					$rootScope.$broadcast('cartChanged');
+					} else if (d.loans.length !== 0) {
 
-					// TODO: Gå til ny skjerm og vis utlånsfrist :)
+						LogService.log('Boka er allerede utlånt!', 'error');
+						that.last_error = 'Boka er allerede utlånt';
+						$rootScope.$broadcast('cartChanged');
 
-				} else {
+						// TODO: Gå til ny skjerm og vis utlånsfrist :)
 
-					that.contents.push({
-						cardData: cardData,
-						catalogueData: d
-					});
+					} else {
 
-					// Broadcast an event
-					console.log(':: Broadcast : Cart changed')
-					that.last_error = '';
-					$rootScope.$broadcast('cartChanged');
+						that.contents.push({
+							cardData: cardData,
+							catalogueData: d
+						});
 
-				}
+						// Broadcast an event
+						console.log(':: Broadcast : Cart changed')
+						that.last_error = '';
+						$rootScope.$broadcast('cartChanged');
 
-			});
+					}
 
-		};
+				});
 
-		// Fetches metadata for an item
-		this.fetchMetadata = function(dokid) {
-			console.log('Fetching metadata for : ' + dokid);
-
-			var promise = $http.get('/documents/show/' + dokid).then(function (response) {
-				// The then function here is an opportunity to modify the response
-				//console.log('got response');
-				//console.log(response);
-				return response.data;
-			}, function(response) {
-				console.log('request failed!');
-				LogService.log('Http request failed!', 'error');
-				return $q.reject(response);
-			});
-
-			return promise;
 		};
 
 		console.log('Created CartService');
@@ -179,7 +166,7 @@
 	};
 
 	CartController.$inject = ['$scope', '$location', 'WebService', 'LogService', 'CartService'];
-	CartService.$inject = ['$rootScope', '$q', '$http', 'LogService'];
+	CartService.$inject = ['$rootScope', 'LogService', 'HttpService'];
 
 	angular.module('bibcraft.selfservice.cart', ['bibcraft.selfservice.services', 'bibcraft.selfservice.user'])
 	  .controller('CartController', CartController)

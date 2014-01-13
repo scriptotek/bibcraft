@@ -59,6 +59,9 @@ header {
   .pagecontainer {
     padding: 2em;
   }
+  .hidden-print {
+    display: none;
+  }
 }
 
 .book-header {

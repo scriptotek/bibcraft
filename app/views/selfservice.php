@@ -10,11 +10,15 @@
   <link href="/vendor/bootstrap/css/bootstrap.min.css" media="screen" type="text/css" rel="stylesheet" />
   <link href="/app/selfservice/selfservice.css" type="text/css" rel="stylesheet" />
 </head>
-<body>
+<body ng-cloak ng-controller="AppController">
+
+  <div class="centralnotice" ng-show="network_error"><div style="padding:20px;">
+    Nettverksforbindelsen er ustabil. Bibcraft fortsetter å prøve å få kontakt
+  </div></div>
 
   <h2 style="padding-left:20px;">BibCraft : Realfagsbibliotekets eksperimentelle og mobile utlånssystem</h2>
 
-  <div class="view" ng-view ng-cloak></div>
+  <div class="view" ng-view></div>
 
   <footer ng-controller="AppController" ng-click="toggleLog()">
     <div class="container">
@@ -54,24 +58,8 @@
   <script src="/app/selfservice/checkout/checkout.js"></script>
   <script src="/app/selfservice/user/user.js"></script>
 
+  <!--
   <script type='text/javascript'>
-    $(document).ready(function () {
-      $('header h1').on('click', function () {
-
-        found_book('051335638');
-
-      });
-
-      function mppi() {
-/*        $('#blinkingblock').toggle();
-        $('header').fadeOut('fast', function() {
-          $('header').fadeIn();
-          setTimeout(mppi, 2000)
-
-        });*/
-        $('#slide1').css(' ','123px')
-      }
-      setTimeout(mppi,300);
 
       $('body').on('dragstart', function (e) {
         event.preventDefault();
@@ -81,39 +69,10 @@
         $('#sfx-click')[0].play();
       });
 
-      $('body').on('mousedown', function (e) {
-        /*if ($(e.target).is('input')) {
-          // pass
-        } else {
-          e.preventDefault();
-        }*/
-        /*console.log(e.target);
-        if ($(e.target).is('a') || $(e.target).is('input') || $(e.target).is('button') || $(e.target).is('label')) {
-          // pass
-        } else {
-          e.preventDefault();
-        }*/
-        //e.stopPropagation();
-      });
-
-      $('body').on('mousemove', function (e) {
-        //e.preventDefault();
-        //e.stopPropagation();
-      });
-
-      $('body').on('click', function (e) {
-        //e.preventDefault();
-        //e.stopPropagation();
-      });
-
-      $('body').on('mouseup', function (e) {
-        //e.preventDefault();
-        //e.stopPropagation();
-      });
-
     });
 
   </script>
+  -->
 
-</body> 
+</body>
 </html>
