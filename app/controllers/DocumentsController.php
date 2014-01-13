@@ -1,9 +1,5 @@
 <?php
 
-if (!extension_loaded('http')) {
-    dd("pecl_http is not installed"); // used for content negotiation
-}
-
 class DocumentsController extends BaseController {
 
 	/**
@@ -58,7 +54,13 @@ class DocumentsController extends BaseController {
         $content_types = array('application/json', 'text/html');
         $content_type = http_negotiate_content_type($content_types);
 
-        if ($content_type == 'text/html') {
+        $negotiator = new \Negotiation\FormatNegotiator();
+        $acceptHeader = $_SERVER['HTTP_ACCEPT'];
+
+        $priorities = array('text/html', 'application/json');
+        $format = $negotiator->getBest($acceptHeader, $priorities);
+
+        if ($format->getValue() == 'text/html') {
 
             return Response::view('documents.index', array(
                 'title' => 'Dokumenter',
@@ -70,7 +72,7 @@ class DocumentsController extends BaseController {
                 'total' => $documents->getTotal()
             ));
 
-        } else if ($content_type == 'application/json') {
+        } else if ($format->getValue() == 'application/json') {
 
             return Response::json(array(
                 'currentPage' => $documents->getCurrentPage(),
