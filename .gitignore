@@ -1,6 +1,8 @@
+/node_modules
 /client/bootstrap/compiled.php
 /client/vendor
 /client/composer.phar
 /client/composer.lock
 /client/public/covers
 /client/public/config.json
+/client/public/components

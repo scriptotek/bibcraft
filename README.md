@@ -6,8 +6,12 @@ Bygget på Laravel og AngularJS.
 
 Oppsett:
 
+	cd client
     composer install
     php artisan migrate
+
+    cd ../node-server
+    npm install
 
 Hvilken samling som vises på selvbetjeningsautomaten settes ved å opprette filen `public/config.json`:
 
