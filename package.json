@@ -1,0 +1,54 @@
+{
+  "title": "Bibcraft",
+  "name": "bibcraft",
+  "description": "Simple lending system",
+  "version": "0.1.0",
+  "author": {
+    "name": "Dan Michael O. Heggø",
+    "email": "d.m.heggo@ub.uio.no"
+  },
+  "contributors": [
+    {
+      "name": "Kyrre T. Låberg",
+      "email": "k.t.laberg@ub.uio.no"
+    }
+  ],
+  "homepage": "https://github.com/scriptotek/bibcraft",
+  "bugs": "https://github.com/scriptotek/bibcraft/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://raw.github.com/scriptotek/bibcraft/master/LICENSE"
+    }
+  ],
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/grunt build && node src/server/server",
+    "install": "cd ./client/public && bower install",
+    "test": "./node_modules/.bin/grunt build"
+  },
+  "dependencies": {
+    "bower": "0.9.2",
+    "express": "3.0.5",
+    "grunt": "~0.4.0",
+    "grunt-cli": "~0.1.6",
+    "grunt-angular-templates": "~0.3.0",
+    "grunt-contrib-clean": "~0.4.0",
+    "grunt-contrib-concat": "~0.1.2",
+    "grunt-contrib-copy": "~0.4.0",
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt-contrib-less": "~0.5.0",
+    "grunt-contrib-livereload": "~0.1.1",
+    "grunt-contrib-mincss": "~0.4.0",
+    "grunt-contrib-uglify": "~0.1.1",
+    "grunt-express-server": "~0.1.0",
+    "grunt-parallel": "0.0.2",
+    "grunt-regarde": "~0.1.1",
+    "grunt-usemin": "~0.1.4",
+    "grunt-verbosity": "~0.1.0",
+    "socket.io": ">= 0.9.6"
+  }
+}
