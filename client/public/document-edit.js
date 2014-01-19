@@ -12,6 +12,7 @@
   }
 
   function addTask(title) {
+    console.log('Starting task: ' + title)
     $stat.append('<img src="/assets/spinner2.gif" title="' + title + '" /> ');
     tasks += 1;
   }
@@ -19,30 +20,30 @@
   function taskDone() {
     tasks -= 1;
     $stat.find('img').first().remove();
-    console.log('tasks left');
+    console.log('Task done. ' + tasks + ' tasks left');
   }
 
   function openLibraryTask(isbn) {
-    addTask('Open Library');
+    addTask('Open Library cover');
     var url = '//services2.biblionaut.net/open_library_cover.php';
-    $.getJSON(url + '?isbn=' + isbn + '&callback=?')
+    $.getJSON(url + '?isbn=' + isbn)
     .done(function(response) {
-      console.log('Fant noe? ' + response);
       if (response.url) {
         openLibraryResult = response.url;
+        console.log('Open library returned: ' + response.url);
       }
       taskDone();
       checkFinish();
     })
     .error(function(e) {
-      alert("Fikk ikke svar fra " + url + "...");
+      alert('Fikk ikke svar fra ' + url);
       tasks -= 1;
       checkFinish();
     });
   }
 
   function sruTask(repo, query, cb) {
-    addTask(repo);
+    addTask(repo.toUpperCase() + ' catalogue');
     $.getJSON('//services.biblionaut.net/sru_iteminfo.php?repo=' + repo, query)
     .done(function(response) {
       response.repo = repo;
@@ -87,7 +88,7 @@
 
     // TASK: ID lookup:
 
-    addTask('ID lookup');
+    addTask('IDs');
     $.getJSON('//services.biblionaut.net/getids.php?id=' + query.dokid)
     .error(function() {
       alert("Fikk ikke svar fra " + repo + "...");
@@ -136,7 +137,7 @@
 
       // TASK: Holdings lookup:
 
-      addTask('Holdings lookup');
+      addTask('BIBSYS holdings');
       $.getJSON('//services.biblionaut.net/bibsys_holdings.php?id=' + query.dokid)
       .error(function() {
         alert("Fikk ikke svar fra " + repo + "...");
