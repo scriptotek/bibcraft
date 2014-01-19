@@ -1,6 +1,5 @@
-var WebSocketServer = require('../ws').Server,
-    _ = require('../underscore'),
-    wss = new WebSocketServer({port: 8080}),
+var WebSocketServer = require('ws').Server,
+    wss = new WebSocketServer({ port: 8080 }),
     clients = [],
     clientId = 0,
     red = '\033[31m',
@@ -10,60 +9,96 @@ var WebSocketServer = require('../ws').Server,
 
 console.log(red + 'THIS IS BIBCRAFT SERVER RUNNING' + reset);
 
+
+function sendStatus() {
+    'use strict';
+
+    var backendCount, frontendCount;
+
+    backendCount = clients.reduce(function(count, obj){
+        return count + (obj.role === 'backend' ? 1 : 0);
+    }, 0);
+
+    frontendCount = clients.reduce(function(count, obj){
+        return count + (obj.role === 'frontend' ? 1 : 0);
+    }, 0);
+
+    console.log('Backends: ' + backendCount + ', frontends: ' + frontendCount);
+
+    clients.forEach(function(client) {
+
+        if (client.role === 'frontend' || client.role === 'backend') {
+            client.socket.send(JSON.stringify({
+                msg: 'status',
+                backends: backendCount,
+                frontends: frontendCount
+            }));
+        }
+
+    });
+}
+
 wss.on('connection', function(ws) {
+    'use strict';
+
     var thisId = clientId++;
 
-    clients[thisId] = { socket: ws, role: 'unknown' };
+    clients[thisId] = {
+        socket: ws,
+        role: 'unknown'
+    };
+
     console.log(green + '# Client connected: ' + thisId + reset);
 
     ws.on('message', function(message) {
-       console.log(green + 'FROM' + reset + ' client %d: %s', thisId, message);
-       //try {
-            var data = JSON.parse(message);
-            if (data.msg == 'hello') {
-                if (data.role == 'frontend') {
-                    console.log('# Client %d identified as frontendclient', thisId);
-                    clients[thisId].role = 'frontend';
-                    backends = _.reduce(clients, function(cli, count){ return count + cli.role=='backend' ? 1 : 0; }, 0);
-                    //clients[thisId].socket.send('{"msg": "hello"}, "role": "backend"}') // ??
-                } else if (data.role == 'backend') {
-                    console.log('> Client %d identified as backendclient', thisId);
-                    clients[thisId].role = 'backend';
-                }
-            } else {
-                console.log('Forwarding to %s ',data.rcpt)
-                _.each(clients, function(idx, client) {
-                    if (client.role == data.rcpt) {
-                        console.log(blue + 'FORWARD TO' + reset + ' client ' + idx);
-                        client.socket.send(message);
-                    }
-                });
-            }
-                /*
-                case 'lookup-book':
-                    console.log('Looking up', data.object_id);
-                    var db = new sqlite3.Database('../storage/bibcraft.sqlite'),
-                        query = 'SELECT item_id, author, title FROM items WHERE objektid="' + data.object_id + '"';
-                    console.log(query);
-                    db.each(query, function(err, row) {
-                        console.log(row);
-                        clients[thisId].send({
-                            id: row.id,
-                            author: row.author,
-                            title: row.title
-                        });
-                        //console.log(row.id + ": " + row.title);
-                    });
-                */
 
-        //} catch (e) {
-        //    console.log('could not parse msg');
-        //}
+        var data;
+
+        console.log(green + 'FROM' + reset + ' client %d: %s', thisId, message);
+        try {
+            data = JSON.parse(message);
+        } catch (e) {
+            console.log(red + ' Invalid JSON!' + reset);
+            return;
+        }
+
+        if (data.msg === 'hello') {
+            if (data.role === 'frontend') {
+
+                console.log('# Client %d identified as frontend', thisId);
+                clients[thisId].role = 'frontend';
+
+            } else if (data.role === 'backend') {
+
+                console.log('> Client %d identified as backend', thisId);
+                clients[thisId].role = 'backend';
+
+            }
+
+            sendStatus();
+
+        } else {
+
+            console.log('Forwarding to %s ', data.rcpt);
+
+            clients.forEach(function(client, idx) {
+                if (client.role === data.rcpt) {
+                    console.log(blue + 'FORWARD TO' + reset + ' client ' + idx);
+                    client.socket.send(message);
+                }
+            });
+
+        }
+
     });
 
     ws.on('close', function() {
+
         clients[thisId].role = 'closed';
         console.log(red + 'Client disconnected: ' + thisId + reset);
+
+        sendStatus();
+
     });
 
 });
