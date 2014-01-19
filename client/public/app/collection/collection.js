@@ -23,14 +23,18 @@
 
 		this.getBooks = function(collectionId, page, itemsPerPage) {
 
-			var promise = $http({method: 'GET', cache: true, url: '/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page})
+			var promise = $http({
+				method: 'GET',
+				cache: true,
+				url: '/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page
+			})
 			.then(function (response) {
 				// The then function here is an opportunity to modify the response
 				console.log(response);
 				// The return value gets picked up by the then in the controller.
 				if (response.data.documents) {
 					for (var i = 0; i < response.data.documents.length; i++) {
-						response.data.documents[i].available = (response.data.documents[i].loans == 0);
+						response.data.documents[i].available = (response.data.documents[i].loans.length === 0);
 					}
 				}
 				return response.data;
@@ -44,7 +48,7 @@
 
 	};
 
-	var CollectionController = function($scope, $location, $routeParams, CollectionService) {
+	var CollectionController = function($scope, $location, $routeParams, CollectionService, ModalService) {
 
 		var collection = -1,
 			page = 1,
@@ -71,17 +75,26 @@
 			$scope.prevPage = function() {
 				console.log('goto prev page');
 				var prevPage = page - 1;
-				if (prevPage == 0) prevPage = lastPage;
+				if (prevPage === 0) {
+					prevPage = lastPage;
+				}
 				console.log('Goto prev page: ' + prevPage);
 				$location.path('/browse/' + prevPage);
-			}
+			};
 
 			$scope.nextPage = function() {
 				var nextPage = page + 1;
-				if (nextPage > lastPage) nextPage = 1;
+				if (nextPage > lastPage) {
+					nextPage = 1;
+				}
 				console.log('Goto next page: ' + nextPage);
 				$location.path('/browse/' + nextPage);
-			}
+			};
+
+			$scope.open = function(book) {
+				ModalService.show('collection/openbook', book);
+			};
+
 		};
 
 		if ($routeParams.page !== undefined) {
@@ -97,19 +110,19 @@
 			collection = parseInt($routeParams.collection, 10);
 			init();
 		} else {
-			CollectionService.getActiveCollection(). then(function(c) {
+			CollectionService.getActiveCollection().then(function(c) {
 				collection = c;
 				init();
-			})
+			});
 		}
 
 	};
 
 	CollectionService.$inject = ['$q', '$http', 'LogService'];
-	CollectionController.$inject = ['$scope', '$location', '$routeParams', 'CollectionService'];
+	CollectionController.$inject = ['$scope', '$location', '$routeParams', 'CollectionService', 'ModalService'];
 
 	angular.module('bibcraft.collection', ['ngRoute','ngTouch'])
-	  .service('CollectionService', CollectionService)
-	  .controller('CollectionController', CollectionController);
+		.service('CollectionService', CollectionService)
+		.controller('CollectionController', CollectionController);
 
 }());

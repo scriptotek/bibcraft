@@ -1,9 +1,9 @@
 
 html,
 body {
+  background: #0000bb;
   width: 100%;
   height: 100%;
-  background: #0000bb;
   color: white;
   margin: 0;
   padding: 0;
@@ -154,6 +154,11 @@ a:link, a:visited {
   margin: 0;
 }
 
+.container {
+  width:100%;
+  height:100%;
+  background: #0000bb;
+}
 
 /* Wrapper for page content to push down footer */
 #wrap {
@@ -165,11 +170,106 @@ a:link, a:visited {
 }
 
 .wizard .books {
-  height: 650px;
+  height: 750px;
   overflow-y:auto;
 }
 .wizard .book {
   clear: both;
+}
+
+/*.openbook-bg {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  -webkit-filter: blur(2px) opacity(0.7) sepia(0.3); 
+}*/
+.modal2 {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0);
+  -webkit-transition: .4s all linear;
+  transition: .4s all linear;
+  opacity: 1;
+}
+.modal2 .inner {
+  border-radius: 10px;
+  padding: 20px;
+  margin: 200px 100px 0 100px;
+  background: rgba(255,255,255,100);
+  color: #666;
+  font-size: 2em;
+  line-height: 120%;
+}
+.modal2 .inner {
+  -webkit-transition: .4s all linear;
+  transition: .4s all linear;
+}
+.modal2.ng-enter .inner {
+  opacity: 0;
+}
+.modal2.ng-enter.ng-enter-active .inner {
+  opacity: 1;
+}
+.modal2.ng-leave .inner {
+  opacity: 1;
+}
+.modal2.ng-leave.ng-leave-active .inner {
+  opacity: 0;
+}
+
+
+.container {
+  -webkit-transition: 0.4s all linear;
+  transition: 0.4s all linear;
+}
+
+
+.blurred.ng-add {
+  filter: blur(0);
+  -moz-filter: blur(0);
+  -webkit-filter: blur(0);
+ }        /* starting animations for enter */
+.blurred.ng-add-active {
+
+ } /* terminal animations for enter */
+.blurred.ng-remove { }        /* starting animations for leave */
+.blurred.ng-remove-active {
+  filter: grayscale(0) blur(0);
+  -moz-filter: grayscale(0) blur(0);
+  -webkit-filter: grayscale(0) blur(0);
+} /* terminal animations for leave */
+.blurred {
+  filter: grayscale(0.7) blur(3px);
+  -moz-filter: grayscale(0.7) blur(3px);
+  -webkit-filter: grayscale(0.7) blur(3px);
+}
+
+
+
+.books .book {
+  margin: 10px;
+  padding: 10px;
+  background: #4444ff;
+  border-radius: 10px;
+  width: 29%;
+  display: block;
+  float: left;
+}
+
+div.error {
+  color: white;
+  font-size: 3em;
+  background: red;
+  padding: 1em;
+  border-radius: .3em;
 }
 
 /* Set the fixed height of the footer here */
@@ -267,7 +367,7 @@ header small {
 }
 
 header h3 {
-	font-size: 150%;
+	font-size: 100px;
   color: white;
   clear:both;
 }
@@ -295,7 +395,7 @@ header h3 {
 }
 .inner-large .slides {
   width: 100%;
-  height: 650px;
+  height: 750px;
 }
 
 .slide {
@@ -326,5 +426,18 @@ header h3 {
 .slides .btn {
   font-size: 21px;
   padding: 14px 24px;
+}
+
+
+
+.slides2 {
+  position: relative;
+  width:100%;
+  height: 750px;
+  font-size: 18px;
+}
+
+.slides2 .inner {
+  padding: 10px 160px;
 }
 

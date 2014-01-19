@@ -7,16 +7,18 @@
 			Låne noe?
 		</a>
 
-		<h3>Bla gjennom samlingen, finn noe du vil ha og hent det på hylla!</h3>
+		<h3>
+			Bla gjennom samlingen, finn noe du vil ha og hent det på hylla!
+		</h3>
 
-		<div ng-show="error" style="color:white; font-size:3em; background:red; padding:1em; border-radius:.3em;">
+		<div ng-show="error" class="error">
 			{{error}}
 		</div>
 	</div>
 
 	<ul class="books" style="clear:both;">
 
-		<li class="book" style="margin:10px;padding: 10px; background:#4444ff; border-radius: 10px; width:29%;display:block;float:left;" ng-repeat="book in books">
+		<li class="book" ng-repeat="book in books" ng-click="open(book);">
 
 			<div style="float:left; width:190px; height: 260px; margin:3px 8px;">
 				<img ng-src="{{book.cachedCover}}" style="max-height: 260px; max-width: 190px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">

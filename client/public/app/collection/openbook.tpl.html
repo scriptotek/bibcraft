@@ -1,0 +1,21 @@
+
+	<div class="inner">
+		<div style="min-height: 400px;">
+			<div style="float:left; width:340px; height: 400px; margin:3px 8px;">
+				<img ng-src="{{data.cachedCover}}" style="max-height: 400px; max-width: 290px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">
+			</div>
+			<strong class="title">{{data.title}} {{data.subtitle }}</strong>
+			<span class="publisher">({{data.publisher }} {{data.year}})</span>
+				<br />
+			Av: {{data.authors}}<br /><br />
+			<div ng-show="data.available" class="available">
+				<img src="/assets/yes_check-24px.png" style="float:left; margin-right: 4px;">
+				Boka er tilgjengelig. Finn den på hylla og legg den på leseren
+				om du vil ha den med deg!
+			</div>
+			<div ng-show="!data.available" class="unavailable">
+				<img src="/assets/x_mark-24px.png" style="float:left; margin-right: 4px;">
+				Boka er dessverre utlånt.
+			</div>
+		</div>
+	</div>
