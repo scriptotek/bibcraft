@@ -1,3 +1,11 @@
+/*
+
+
+Se også selfservice.css
+
+
+*/
+
 html, body {
   height: 100%;
   width: 100%;
@@ -129,4 +137,3 @@ h2 {
   margin: 1em auto; 
   opacity: 0.7;
 }
-
