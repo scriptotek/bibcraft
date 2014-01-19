@@ -1,8 +1,10 @@
-'use strict';
+(function() {
 
-/* Services */
+	'use strict';
 
-angular.module('bibcraft.selfservice.services', [])
+	/* Services */
+
+	angular.module('bibcraft.selfservice.services', [])
 	.service('WebService', ['$rootScope', 'LogService', function(rs, LogService) {
 
 		this.connection = null;
@@ -26,27 +28,43 @@ angular.module('bibcraft.selfservice.services', [])
 				LogService.log('Connected to ' + e.target.url + ', identifying as frontend client');
 				that.send({'msg': 'hello', 'role': 'frontend'});
 			};
-			this.connection.onclose = function(e) {
-					LogService.log('Connection closed. Retrying in 5 seconds.', 'error');
+			this.connection.onclose = function() {
+				LogService.log('Connection closed. Retrying in 5 seconds.', 'error');
 				setTimeout(function() {
-						that._reconnect(url);
+					that._reconnect(url);
 				}, 5000);
 			};
 			this.connection.onerror = function(e) {
-					LogService.log('Oh noes, webservice error: ' + e.data, 'error');
+				LogService.log('Oh noes, webservice error: ' + e.data, 'error');
 			};
 			this.connection.onmessage = function(e) {
-					LogService.log('RECV: ' + e.data);
-					rs.$broadcast('messageReceived', e.data);
+				LogService.log('RECV: ' + e.data);
+				var data;
+				try {
+					data = JSON.parse(e.data);
+				} catch (err) {
+					// received invalid message
+					return;
+				}
+				rs.$broadcast('messageReceived', data);
+
+				if (data.msg && data.msg === 'status') {
+					if (data.backends === 0) {
+						LogService.log('No connection to RFID module!', 'error');
+					} else {
+						LogService.log('Connection OK', 'info');
+					}
+				}
 			};
 		};
 
 		this.connect = function(url) {
-			if (this.connection == null) {
+			if (this.connection === null) {
 				this._reconnect(url);
 			} else {
 				//console.log('Already connected');
 			}
-		}
+		};
 
 	}]);
+}());
