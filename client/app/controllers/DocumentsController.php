@@ -10,7 +10,16 @@ class DocumentsController extends BaseController {
 	 */
 	public function getShow($id)
 	{
-		$doc = Document::with('loans')->where('id','=',$id)->orWhere('bibsys_dokid','=',$id)->orWhere('bibsys_knyttid','=',$id)->first();
+        if (is_numeric($id)) {
+            $doc = Document::with('loans')
+                ->where('id','=',$id)
+                ->first();
+        } else {
+            $doc = Document::with('loans')
+                ->where('bibsys_dokid','=',$id)
+                ->orWhere('bibsys_knyttid','=',$id)
+                ->first();
+        }
 		if (!$doc) {
 			return Response::JSON(array('error' => 'not_found'));
 		}
