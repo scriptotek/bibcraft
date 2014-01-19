@@ -90,8 +90,8 @@
 		 * Prøver å slå opp telefonnummer i ekstern katalog
 		 */
 		function phoneNumberLookup(tlfnr) {
-			HttpService.neverEverGiveUp({ method: 'GET', url: '//services2.biblionaut.net/phone_number_lookup.php?number=' + tlfnr, timeout: 10000 })
-				.then(function (response) {
+			HttpService.neverEverGiveUp({ method: 'GET', url: '//services2.biblionaut.net/phone_number_lookup.php?phone=' + tlfnr, timeout: 10000 })
+				.then(function (person) {
 
 					// decode html entities in a funny way:
 					var pname = $('<div />').html(response.personname).text();
@@ -279,14 +279,14 @@
 
 		});
 
-		WebService.connect('ws://labs.biblionaut.net:8080');
+		WebService.connect('ws://linode2.biblionaut.net:8080');
 
 	};
 
 	CheckoutController.$inject = ['$scope', '$location', 'LogService', 'WebService', 'CartService', 'HttpService'];
 
 	angular.module('bibcraft.selfservice.checkout', ['ngLocale', 'ngAnimate', 'bibcraft.selfservice.services'])
-	  .controller('CheckoutController', CheckoutController);
+		.controller('CheckoutController', CheckoutController);
 
 
 }());

@@ -10,7 +10,7 @@
 
 		$scope.cart_error = 'Ingen feil';
 
-		WebService.connect('ws://labs.biblionaut.net:8080');
+		WebService.connect('ws://linode2.biblionaut.net:8080');
 
 		function found_book(item) {
 			console.log("-[cart]---------------------------------------");
@@ -18,11 +18,7 @@
 			CartService.add(item);
 		}
 
-		function onWebSocketMessageReceived(e, msg) {
-
-			console.log("New Message: " + msg);
-
-			var data = JSON.parse(msg);
+		function onWebSocketMessageReceived(e, data) {
 
 			/* Example response: {
 				"msg": "new-tag",

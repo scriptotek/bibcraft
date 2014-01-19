@@ -8,7 +8,7 @@
 
 	var SelfServiceIndexController = function($scope, $location, $timeout, WebService, LogService, CartService) {
 
-		WebService.connect('ws://labs.biblionaut.net:8080');
+		WebService.connect('ws://linode2.biblionaut.net:8080');
 
 		function found_book(item) {
 			console.log("-[index]---------------------------------------");
@@ -26,13 +26,10 @@
 			$timeout(function() {
 				$location.path('/cart');
 			}, 50);
-		}
+		};
 
-		function onWebSocketMessageReceived(e, msg) {
+		function onWebSocketMessageReceived(e, data) {
 
-			//console.log("New Message: " + msg);
-
-			var data = JSON.parse(msg);
 
 			/* Example response: {
 				"msg": "new-tag",
