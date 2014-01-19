@@ -40,6 +40,10 @@
 			}
 		};
 
+		$scope.changePhoneNo = function() {
+			$scope.step = 'start';
+		};
+
 		$scope.myloans = function (){
 			$location.path('/users/' + user_id);
 		};
@@ -81,7 +85,7 @@
 			HttpService.neverEverGiveUp({ method: 'GET', url: '/users/new-activation-code?phone=' + tlfnr })
 				.then(function (response) {
 					LogService.log('Ny aktiveringskode sendt.');
-					$scope.header = 'Verifisér bruker';
+					//$scope.header = 'Verifisér bruker';
 					$scope.step = 'confirm';
 				});
 		}
@@ -94,14 +98,14 @@
 				.then(function (person) {
 
 					// decode html entities in a funny way:
-					var pname = $('<div />').html(response.personname).text();
+					//var pname = $('<div />').html(response.personname).text();
 
-					if (pname == 'unknown') {
+					if (!person.found) {
 						LogService.log('Klarte ikke å slå opp telefonnummeret', 'error');
 						$scope.data.name = '';
 					} else {
-						LogService.log('Fant navn: ' + pname);
-						$scope.data.name = pname;
+						LogService.log('Fant navn: ' + person.displayname);
+						$scope.data.name = person.displayname;
 					}
 
 					storeUser($scope.data);
@@ -223,9 +227,7 @@
 		 * Triggered whenever we received a websocket message from the WebsocketService.
 		 * The broadcasted message bubbles up to our $scope from $rootScope
 		 */
-		$scope.$on('messageReceived', function (e, msg) {
-
-			var data = JSON.parse(msg);
+		$scope.$on('messageReceived', function (e, data) {
 
 			/* Example response: {"msg": "new-tag", "item": {
 					"uid": "9ACA9C16500104E0",
