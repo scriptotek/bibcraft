@@ -11,6 +11,19 @@
 			Bla gjennom samlingen, finn noe du vil ha og hent det på hylla!
 		</h3>
 
+		<!--<div class="btn-group">
+		    <a
+				ng-repeat="col in subcollections"
+				href 
+				ng-click="$parent.selectSubCollection(col.id)" 
+				ng-class="{ 'active' : $parent.selectedSubCollection == col.id }"
+				class="btn btn-success"
+				id="subcollection{{ col.id }}"
+			>
+				{{ col.caption }}
+			</a>
+		</div>-->
+
 		<div ng-show="error" class="error">
 			{{error}}
 		</div>
@@ -38,6 +51,6 @@
 </div>
 
 <div style="text-align:center; position:absolute;bottom:40px;left:0;width:100%; font-size: 14em;">
-	<a href ng-click="prevPage()"><i class="icon-circle-arrow-left"></i></a>
-	<a href ng-click="nextPage()"><i class="icon-circle-arrow-right"></i></a>
+	<a href ng-click="prevPage()"><i class="fa fa-chevron-circle-left"></i></a>
+	<a href ng-click="nextPage()"><i class="fa fa-chevron-circle-right"></i></a>
 </div>

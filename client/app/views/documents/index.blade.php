@@ -1,108 +1,121 @@
 @extends('master')
 @section('header')
-    <h2>
-      Dokumenter
-      @if ($collection)
-        i samlingen «{{$collection->name}}»
-      @endif
-    </h2>
+  <h2>
+    Dokumenter
+  </h2>
+  @if (isset($collection))
+    <h3>
+      {{ $collection->name }}
+      ({{ count($documents) }} dokumenter)
+    </h3>
+  @endif
 @stop
 @section('container')
 
-@if ($collection)
+@if (Auth::check())
+  <form role="form" class="hidden-print" style="margin-bottom: 10px;" method="post" action="{{ URL::action('DocumentsController@postStore') }}">
 
-<form class="form-inline" method="post" action="{{ URL::action('CollectionsController@postRemoveFromCollection', $collection->id) }}">
-@else
-<form class="form-inline" method="post" action="{{ URL::action('CollectionsController@postAddToCollection') }}">
+    <input type="hidden" name="collection" value="{{ $collection->id }}">
+
+    <label for="barcode">Strekkode</label>
+    <input type="text" name="barcode" id="barcode" value="">
+
+    <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-plus"></span>
+        Legg til
+    </button>
+  </form>
+
 @endif
 
+  
+  {{--
   <p style="float:right">
     Viser {{$from}}-{{$to}} av {{$total}}.
-    Vis {{ Form::select('perPage', array('5' => '5', '10' => '10', '25' => '25', '50' => '50', '100' => '100'), Input::get('itemsPerPage', Session::get('itemsPerPage', '10')), array('id' => 'perPage', 'style' => 'width:60px;')) }}
+    Vis {{ Form::select('perPage', 
+      array('5' => '5', '10' => '10', '25' => '25', '50' => '50', '100' => '100', '9999' => 'Alt'), 
+      Input::get('itemsPerPage', Session::get('itemsPerPage', '10')), 
+      array('id' => 'perPage', 'style' => 'width:60px;'))
+    }}
     per side
   </p>
+  --}}
+<div id="books">
+  <input type="text" class="search" placeholder="Søk">
+  <ul class="list">
 
-  <div class="hidden-print">
-    @if ($collection)
-    <a href="{{ URL::action('DocumentsController@getCreate') }}?collection={{$collection->id}}" class="btn">
-      <i class="icon-plus-sign"></i>
-      Nytt dokument
-    </a>
-    @else
-    <a href="{{ URL::action('DocumentsController@getCreate') }}" class="btn">
-      <i class="icon-plus-sign"></i>
-      Nytt dokument
-    </a>
-    @endif
-  </div>
+    @foreach ($documents as $obj)
+    <li>
 
-  <div id="actionsForSelected" class="hidden-print" style="padding: 6px 6px; margin: 15px 0; border-radius:4px; background: #ededed;">
-  @if ($collection)
-    Fjern merkede dokumenter fra samlingen? <button type="submit" class="btn">Fjern</button>
-  @else
-    Legg til merkede dokumenter i samling: {{ Form::select('collection', $collections, null, array('style' => 'width: 284px;' )) }}
-    <button type="submit" class="btn">Legg til</button>
-  @endif
-  </div>
-
-
-
-  <ul style="list-style-type:none; clear:both;margin-top:20px;">
-  @foreach ($documents as $obj)
-
-    <!-- ************************************************
-    We should make this into a template -->
-    <li style="margin:10px;padding: 10px; background:#ececec;">
-      <input type="checkbox" style="float:left; display: block; height: 120px; width:30px;" name="check_{{ $obj->id }}">
-      <div style="float:left; width:120px; height: 120px; margin:3px 8px;">
-        <img src="{{ $obj->cachedCover }}" style="max-height: 120px; max-width: 120px; display: block; margin: auto; box-shadow: 2px 2px 5px #888888;">
+      <div class="cover">
+        <img src="{{ $obj->cachedCover }}" alt="Cover">
       </div>
-      <strong>{{ $obj->title }} {{ $obj->subtitle }}</strong> ({{$obj->publisher }} {{$obj->year }})<br>
-      Av: {{ $obj->authors }}<br>
-      Dokid: {{ $obj->bibsys_dokid }}, plass: {{ $obj->callcode }}<br>
-      Lagt til: {{ $obj->created_at }}<br>
-      Samlinger:
-      @if (count($obj->collections) == 0)
-        <em>Ingen</em>
-      @else
-        @foreach ($obj->collections as $collection)
-          <a href="{{URL::route('collectionDocuments', $collection->id)}}">{{$collection->name}}</a>
-        @endforeach
-      @endif
-      <br>
 
-      <?php
-      // If too many items are shown on the page, checking the imagesize for everyone would be sloooow
-      if (intval(Input::get('itemsPerPage', Session::get('itemsPerPage', '10'))) < 50) {
-        list($width, $height) = @getimagesize( public_path() . $obj->cachedCover );
-        echo 'Omslagsbilde: ';
-        if ($width) {
-          echo $width . ' x ' . $height . ' px';
-        } else {
-          echo '<em>Mangler</em>';
-        }
-        echo '<br />';
-      }
-      ?>
-      <br />
+      <a href="http://ask.bibsys.no/ask/action/show?pid={{ $obj->bibsys_objektid }}&amp;kid=biblio" class="caption">
+        {{ $obj->title }} {{ $obj->subtitle }}
+      </a>
 
-
-      <div class="hidden-print">
-        <a href="{{ URL::action('DocumentsController@getEdit', $obj->id) }}"><i class="icon-pencil"></i> rediger</a>
-        <a href="{{ URL::action('DocumentsController@getDelete', $obj->id) }}"><i class="icon-trash"></i> slett</a>
+      <div>
+        Av <em class="creator">{{ $obj->authors }}</em>
       </div>
-      <div style="clear:both;"></div>
+      
+      <div class="details">
+        Utgitt: {{$obj->publisher }}, {{$obj->year }}<br> 
+        Plass: <span class="location">
+          {{ $obj->shelvinglocation }} {{ $obj->callcode }} (dokid {{ $obj->bibsys_dokid }})
+        </span><br>
+        
+        <div class="hidden-print">
+          {{-- Lagt til: {{ $obj->created_at }}<br>
+          Samlinger:
+          @if (count($obj->collections) == 0)
+            <em>Ingen</em>
+          @else
+            @foreach ($obj->collections as $collection)
+              <a href="{{URL::route('collectionDocuments', $collection->id)}}">{{$collection->name}}</a>
+            @endforeach
+          @endif --}}
+          @if (count($obj->loans) > 0)
+          <i class="icon-exclamation-sign"></i> UTLÅNT<br>
+          @else
+          <i class="icon-exclamation-sign"></i> LEDIG<br>
+          @endif
+        </div>
+
+        <?php
+        // If too many items are shown on the page, checking the imagesize for everyone would be sloooow
+        /*if (intval(Input::get('itemsPerPage', Session::get('itemsPerPage', '10'))) < 50) {
+          list($width, $height) = @getimagesize( public_path() . $obj->cachedCover );
+          echo 'Omslagsbilde: ';
+          if ($width) {
+            echo $width . ' x ' . $height . ' px';
+          } else {
+            echo '<em>Mangler</em>';
+          }
+          echo '<br />';
+        }*/
+        ?>
+
+        @if (Auth::check())
+        <div class="hidden-print">
+          <br>
+          <a href="{{ URL::action('DocumentsController@getEdit', array(
+            'id' => $obj->id, 
+            'collection' => $collection->id,
+            )) }}"><i class="icon-pencil"></i> rediger</a>
+          <a href="{{ URL::action('CollectionsController@getRemoveDocument', array($collection->id, $obj->id)) }}"><i class="icon-trash"></i> fjern</a>
+        </div>
+        @endif
+      </div>
+
+      <div class="breaker"><!-- --></div>
+
     </li>
-    <!-- ************************************************
-    End of the template -->
+    @endforeach
 
-  @endforeach
   </ul>
-
-</form>
-
+  </div>
   {{ $documents->links() }}
-
 
 @stop
 
@@ -123,6 +136,19 @@
         var perPage = $('#perPage').val();
         window.location.href = '{{Request::url()}}?itemsPerPage=' + perPage;
       });
+
+      $('#barcode').focus();
+
+      var booksList = new List('books', {
+        valueNames: [ 'caption', 'creator', 'location' ]
+      });
+      console.log(booksList);
+
+      // $('#search').on('keypress', function(k) {
+      //   console.log(booksList);
+      //   var term = $('#search').val();
+      //   booksList.search(term);
+      // });
 
     });
   </script>

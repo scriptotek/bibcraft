@@ -5,14 +5,15 @@ Form::macro('textWithLabelAndSearch', function($id, $label, $btn_label)
 {
     $value = Form::getValueAttribute($id, null);
     return '
-      <div class="control-group" id="control-' . $id . '">
-        <label class="control-label" for="' . $id . '">' . $label . '</label>
-        <div class="controls">
-          <div class="input-append">
-            <input class="input-medium" type="text" id="' . $id . '" name="' . $id . '" value="' . $value . '" placeholder="' . $label . '">
-            <button type="button" class="btn btn-success" data-loading-text="Slår opp...">' . $btn_label . '</button>
-          </div>
-            <span class="status"></span>
+      <div class="form-group" id="control-' . $id . '">
+        <label class="control-label col-sm-2" for="' . $id . '">' . $label . '</label>
+        <div class="col-sm-6">
+          <div class="input-group">
+            <input class="form-control" type="text" id="' . $id . '" name="' . $id . '" value="' . $value . '" placeholder="' . $label . '">
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-success" data-loading-text="Slår opp...">' . $btn_label . '</button>
+            </span>
+          </div>          
         </div>
       </div>';
 });
@@ -21,10 +22,13 @@ Form::macro('textWithLabel', function($id, $label, $extras='')
 {
     $value = Form::getValueAttribute($id, null);
     return '
-      <div class="control-group">
-        <label class="control-label" for="' . $id . '">' . $label . '</label>
-        <div class="controls">
-          <input class="input-xlarge" type="text" id="' . $id . '" name="' . $id . '" value="' . $value . '" placeholder="' . $label . '"><span style="padding-left: 10px;">' . $extras . '</span>
+      <div class="form-group">
+        <label class="control-label col-sm-2" for="' . $id . '">' . $label . '</label>
+        <div class="col-sm-6">
+          <input class="form-control" type="text" id="' . $id . '" name="' . $id . '" value="' . $value . '" placeholder="' . $label . '">
+        </div>
+        <div class="col-sm-4">
+          ' . $extras . '
         </div>
       </div>';
 });
@@ -47,10 +51,11 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
     {{ Form::model($document, $formData) }}
 
       <h2>{{ $isNew ? 'Nytt dokument' : 'Rediger dokument' }}</h2>
-      {{ Form::textWithLabelAndSearch('bibsys_knyttid', 'Knyttid', 'Slå opp') }}
       {{ Form::textWithLabel('bibsys_dokid', 'Dokid') }}
+      {{ Form::textWithLabel('bibsys_knyttid', 'Knyttid') }}
       {{ Form::textWithLabel('bibsys_objektid', 'Objektid') }}
       {{ Form::textWithLabel('isbn', 'ISBN') }}
+      {{ Form::textWithLabel('shelvinglocation', 'Samling') }}
       {{ Form::textWithLabel('callcode', 'Hylleplass') }}
       {{ Form::textWithLabel('title', 'Tittel') }}
       {{ Form::textWithLabel('subtitle', 'Undertittel') }}
@@ -62,16 +67,16 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       {{ Form::textWithLabel('cover', 'Omslagsbilde-URL') }}
       {{ Form::textWithLabel('dewey', 'Dewey') }}
 
-      <div class="control-group">
-          {{ Form::label('collections', 'Samling(er)', array('class' => 'control-label')) }}
+      <div class="form-group">
+        {{ Form::label('collections', 'Samling(er)', array('class' => 'control-label col-sm-2')) }}
 
-        <div class="controls">
+        <div class="col-sm-6 control-group">
 
           {{ Form::select('collections[]', $collections,
             $collection ? array($collection) : (Session::has('_old_input') ? Session::has('_old_input.collections') : $document->collection_ids()),
             array(
               'multiple' => 'multiple',
-              'style' => 'width: 284px;',
+              'style' => 'width: 100%;',
               'id' => 'collections'
           )) }}
 
@@ -79,7 +84,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       </div>
 
       @if ($collection)
-        <input type="hidden" name="collection" value="$collection" />
+        <input type="hidden" name="collection" value="{{ $collection }}" />
       @endif
 
       <a href="{{URL::action('DocumentsController@getIndex')}}" class="btn">Avbryt</a>

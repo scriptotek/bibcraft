@@ -1,12 +1,15 @@
 {
-	"name": "laravel/laravel",
-	"description": "The Laravel Framework.",
+	"name": "scriptotek/bibcraft",
+	"description": "Bibcraft, mobile lending system.",
 	"keywords": ["framework", "laravel"],
 	"require": {
-		"laravel/framework": "4.0.*",
+		"laravel/framework": "4.1.*",
 		"way/generators": "dev-master",
 		"civocr/nexmo-php-lib": "dev-master",
-		"willdurand/negotiation": "1.2.*"
+		"willdurand/negotiation": "1.2.*",
+        "schickling/backup": "dev-master",
+        "danmichaelo/ncip": "dev-master",
+		"rmccue/requests": "dev-master"
 	},
 	"autoload": {
 		"classmap": [

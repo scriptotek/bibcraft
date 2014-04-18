@@ -1,0 +1,10 @@
+@extends('master')
+
+@section('container')
+	<h2>
+		{{ isset($what) ? $what : 'Siden' }} finnes ikke.
+	</h2>
+	<p>
+		Tja… 
+	</p>
+@stop

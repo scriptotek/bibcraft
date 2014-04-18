@@ -7,7 +7,9 @@ class Collection extends Eloquent {
 
     public function documents()
     {
-        return $this->belongsToMany('Document');
+        return $this->belongsToMany('Document')
+            ->withPivot('created_at')
+            ->orderBy('pivot_created_at', 'desc');
     }
 
     public function document_ids()

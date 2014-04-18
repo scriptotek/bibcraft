@@ -53,11 +53,32 @@ class CollectionsController extends BaseController {
 	 */
 	public function getShow($id)
 	{
-		$col = Collection::with('documents')->find($id);
 
-        return View::make('collections.show')
-            ->with('title', $col->title)
-            ->with('collection', $col);
+        $itemsPerPage = Input::get('itemsPerPage', Session::get('itemsPerPage', 10));
+
+        if ($itemsPerPage) {
+            Session::put('itemsPerPage', $itemsPerPage);
+        }
+
+        if (Input::get('page')) {
+            Session::put('page', Input::get('page'));
+        }
+
+        $collection = Collection::find($id);
+        if (!$collection) {
+            return Response::json(array('error' => 'collection does not exists'));
+        }
+        $documents = $collection->documents()->with('loans')->paginate($itemsPerPage);
+
+        return Response::view('collections.show', array(
+            'title' => $collection->name,
+            'collection' => $collection,
+            'documents' => $documents,
+            'from' => $documents->getFrom(),
+            'to' => $documents->getTo(),
+            'total' => $documents->getTotal()
+        ));
+
 	}
 
 	/**
@@ -176,4 +197,20 @@ class CollectionsController extends BaseController {
             ->with('status', 'Dokumentet/-ne ble fjernet fra samlingen');
     }
 
+  	/**
+     * Remove a document from a collection
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function getRemoveDocument($collectionId, $documentId)
+    {
+        $doc = Document::find($documentId);
+
+        $col = Collection::find($collectionId);
+        $col->documents()->detach($documentId);
+
+        return Redirect::back()
+            ->with('status', 'Dokumentet «' . $doc->title . '» ble fjernet fra samlingen.');
+    }
 }

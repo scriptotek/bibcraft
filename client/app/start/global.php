@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 /*
 |--------------------------------------------------------------------------
 | Register The Laravel Class Loader
@@ -47,6 +49,22 @@ Log::useDailyFiles(storage_path().'/logs/'.$logFile);
 | shown, which includes a detailed stack trace during debug.
 |
 */
+
+App::missing(function($exception)
+{
+    return Response::view('errors.missing', array(
+		'title' => '404',
+		'what' => $exception->getMessage() ?: 'Siden'
+	), 404);
+});
+
+App::error(function(HttpException $exception)
+{
+    return Response::view('errors.http', array(
+		'title' => 'En feil!',
+		'msg' => $exception->getMessage() ?: 'Ukjent feil'
+	), $exception->getStatusCode());
+});
 
 App::error(function(Exception $exception, $code)
 {

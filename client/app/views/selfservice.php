@@ -55,9 +55,10 @@
     <source src="assets/error.mp3" type="audio/mpeg" />
   </audio>
 
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script src="/components/jquery/dist/jquery.js"></script>
   <script src="/vendor/bootstrap/js/bootstrap.min.js"></script>
-  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
+  <link href="/components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-route.min.js"></script>

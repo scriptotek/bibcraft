@@ -19,4 +19,7 @@ Hvilken samling som vises på selvbetjeningsautomaten settes ved å opprette fil
         "activeCollection": 2
     }
 
-Du kan evt. kopiere `public/config.dist.json`
+Du kan evt. kopiere `public/config.dist.json`.
+
+Webserveren må ha skrivetilgang til `public/covers` og `app/storage`.
+

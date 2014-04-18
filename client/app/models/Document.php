@@ -18,7 +18,7 @@ class Document extends Eloquent {
      */
     public static $fields = array('bibsys_objektid', 'bibsys_dokid', 'bibsys_knyttid',
         'series', 'volume', 'isbn', 'title', 'subtitle', 'authors', 'year', 'cover',
-        'publisher', 'dewey', 'callcode');
+        'publisher', 'dewey', 'callcode', 'shelvinglocation');
 
     /**
      * Hard validation rules for humans with brains.
@@ -68,7 +68,8 @@ class Document extends Eloquent {
 
     public function collections()
     {
-        return $this->belongsToMany('Collection');
+        return $this->belongsToMany('Collection')
+            ->withTimestamps();
     }
 
     public function collection_ids()

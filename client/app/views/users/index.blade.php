@@ -5,12 +5,12 @@
 @stop
 @section('container')
 
-  <ul>
+  <ul class="list-group">
 @foreach ($users as $user)
-    <li>
+    <li class="list-group-item">
       <a href="{{ URL::action('UsersController@getShow', $user->id) }}">
-      	{{ $user->name }}
-      </a><br />
+      	{{ $user->name ?: '(uten navn)' }}
+      </a> : {{ $user->phone }}<br />
 
       Opprettet: {{ $user->created_at }}<br />
 

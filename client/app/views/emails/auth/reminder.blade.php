@@ -4,10 +4,10 @@
 		<meta charset="utf-8">
 	</head>
 	<body>
-		<h2>Password Reset</h2>
+		<h2>Velkommen til Bibcraft</h2>
 
 		<div>
-			To reset your password, complete this form: {{ URL::to('password/reset', array($token)) }}.
+			For å lage ditt eget passord, gå til {{ URL::route('LibrariansControll@getActivate', array($token)) }}.
 		</div>
 	</body>
 </html>

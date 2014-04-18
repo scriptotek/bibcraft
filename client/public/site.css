@@ -10,34 +10,6 @@ html, body {
   height: 100%;
   width: 100%;
 }
-body {
-  /*font-family:'Source Code Pro', sans-serif;*/
-  font-family: Verdana, Arial, Helvetica, sans-serif;
-  color: #777;
-  font-size:0.8em;
-  /*background: url(/img/20-seamless-paper-texture/Texture0219.jpg);*/
-}
-@media screen {
-  .container-narrow {
-    max-width: 700px;
-    margin: 0 auto;
-     height:100%;
-  }
-}
-
-.pagination {
-  text-align: center;
-}
-
-.main .inner {
-  padding: 10px 20px;
-}
-
-.alert {
-  margin: 1em 3em;
-  border-width:3px;
-  box-shadow: 2px 2px 5px #888888;
-}
 
 a {
   -webkit-transition: all 0.1s linear;
@@ -60,10 +32,26 @@ header {
   padding: 10px 0;
   margin-bottom: 10px;
 }
+.pagination {
+  display: table;
+  margin: 1em auto 3em auto;
+}
+
+/*.pagination {
+  text-align: center;
+}
+
+.main .inner {
+  padding: 10px 20px;
+}
+
+.alert {
+  margin: 1em 3em;
+  border-width:3px;
+  box-shadow: 2px 2px 5px #888888;
+}
+
 @media print {
-  header {
-    display: none;
-  }
   .pagecontainer {
     padding: 2em;
   }
@@ -136,4 +124,72 @@ h2 {
   display: block;
   margin: 1em auto; 
   opacity: 0.7;
+}
+*/
+
+@media print {
+  a[href]:after {
+    content: none !important;
+  }
+}
+
+
+#books ul {
+  margin: 0 0 2em 0;
+  padding: 0;
+}
+#books ul li {
+  list-style-type: none;
+  margin: 0;
+  padding: 1em 0 0 0;
+  page-break-inside:avoid;
+}
+
+#books ul .cover {
+  display:inline-block;
+  vertical-align:middle;
+  float: left;
+  margin-right: 1em;
+}
+#books ul .cover img {
+  display: block;
+  margin: auto;
+  box-shadow: 2px 2px 5px #888888;
+}
+
+@media print {
+  #books ul .cover {
+    width:80px;
+    height: 80px;
+  }
+  #books ul .cover img {
+    max-height: 80px; 
+    max-width: 80px;
+  }
+}
+@media not print {
+  
+  #books ul .cover {
+    width:120px;
+    height: 120px;
+  }
+  #books ul .cover img {
+    max-height: 120px; 
+    max-width: 120px;
+  }
+
+}
+
+#books ul .caption {
+  display: block;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#books ul .details {
+  font-size: 0.8em;
+  font-size: #888;
+}
+#books ul .breaker {
+  clear:both;
+  height: 1px;
 }

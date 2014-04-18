@@ -1,0 +1,28 @@
+{
+  "name": "bibcraft",
+  "version": "0.1.0",
+  "homepage": "https://github.com/scriptotek/bibcraft",
+  "private": true,
+  "authors": [
+    "Dan Michael O. Heggø <danmichaelo@gmail.com>"
+  ],
+  "description": "Mobile library system",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "client/public/components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-animate": "1.2.8",
+    "angular-route": "1.2.8",
+    "angular-touch": "1.2.8",
+    "animate.css": "~3.0.0",
+    "font-awesome": "~4.0.3",
+    "list.js": "~1.1.1",
+    "jquery": "~2.1.0"
+  }
+}

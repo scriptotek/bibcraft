@@ -4,15 +4,23 @@
 
 	var CollectionService = function($q, $http, LogService) {
 
+		var activeSubCollection = -1;
+
+		this.setSubCollection = function(id) {
+			activeSubCollection = id;
+			console.log('set subcollection: ' + id);
+		};
+
 		this.getActiveCollection = function() {
+			console.log('active subcollection: ' + activeSubCollection);
 
 			var promise = $http({method: 'GET', cache: true, url: '/config.json'})
 			.then(function (response) {
 				if (response.data.activeCollection) {
-					LogService.log('Viser samling: ' + response.data.activeCollection, 'info');
-					return response.data.activeCollection;
+					//LogService.log('Viser samling: ' + response.data.activeCollection, 'info');
+					return [response.data.activeCollection, activeSubCollection];
 				}
-				return -1;
+				return [-1, -1];
 			}, function(response) {
 				LogService.log('Http request failed!', 'error');
 				return $q.reject(response);
@@ -21,12 +29,14 @@
 			return promise;
 		};
 
-		this.getBooks = function(collectionId, page, itemsPerPage) {
+		this.getBooks = function(collections, page, itemsPerPage) {
+
+			var collections = collections.join(',');
 
 			var promise = $http({
 				method: 'GET',
 				cache: true,
-				url: '/collections/' + collectionId + '/documents?itemsPerPage=' + itemsPerPage + '&page=' + page
+				url: '/documents?collection=' + collections + '&itemsPerPage=' + itemsPerPage + '&page=' + page
 			})
 			.then(function (response) {
 				// The then function here is an opportunity to modify the response
@@ -37,6 +47,7 @@
 						response.data.documents[i].available = (response.data.documents[i].loans.length === 0);
 					}
 				}
+				LogService.log('Samlingen inneholder ' + response.data.total + ' bøker. Viser side ' + response.data.currentPage + ' av ' + response.data.lastPage + '.', 'info');
 				return response.data;
 			}, function(response) {
 				LogService.log('Http request failed!', 'error');
@@ -60,7 +71,14 @@
 
 			$scope.books = [];
 
-			CollectionService.getBooks(collection, page, itemsPerPage).then(function(d) {
+			$scope.subcollections = [{id: -1, caption:'Alt'}, {id:2, caption:'Noe'}, {id:3, caption:'Intet'}];
+			//$scope.selectedSubCollection = 1;
+
+			var collections = [collection];
+			if ($scope.selectedSubCollection != -1) collections.push($scope.selectedSubCollection);
+			console.log('getBooks for collections: ' + collections.join(', '));
+
+			CollectionService.getBooks(collections, page, itemsPerPage).then(function(d) {
 
 				if (d.error) {
 					$scope.error = d.error;
@@ -95,6 +113,11 @@
 				ModalService.show('collection/openbook', book);
 			};
 
+			$scope.selectSubCollection = function(id) {
+				$scope.selectedSubCollection = id;
+				CollectionService.setSubCollection(id);
+			};
+
 		};
 
 		if ($routeParams.page !== undefined) {
@@ -111,7 +134,9 @@
 			init();
 		} else {
 			CollectionService.getActiveCollection().then(function(c) {
-				collection = c;
+				collection = c[0];
+				$scope.selectedSubCollection = c[1];
+				console.log('$scope.selectedSubCollection: ' + $scope.selectedSubCollection);
 				init();
 			});
 		}

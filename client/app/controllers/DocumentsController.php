@@ -2,6 +2,16 @@
 
 class DocumentsController extends BaseController {
 
+    protected $collection;
+
+    public function __construct(){
+        $this->collection = intval(Input::get('collection', Session::get('collection', null)));
+        /*$this->collections = explode(',', Input::get('collection', Session::get('collection', null)));
+        $this->collections = array_map(function($c) {
+            return intval($c);
+        }, $this->collections);*/
+    }
+
 	/**
 	 * Display the specified resource.
 	 *
@@ -31,37 +41,56 @@ class DocumentsController extends BaseController {
 	 *
 	 * @return Response
 	 */
-    public function getIndex($collectionId = null)
+    public function getIndex()
     {
-        $collections = array();
-        foreach (Collection::all() as $c) {
-            $collections[$c->id] = $c->name;
+
+        if (!$this->collection) {
+            return Redirect::action('CollectionsController@getIndex');
         }
 
+        $allcollections = array();
+        foreach (Collection::all() as $c) {
+            $allcollections[$c->id] = $c->name;
+        }
 
-        $itemsPerPage = Input::get('itemsPerPage', Session::get('itemsPerPage', 10));
+        $itemsPerPage = Input::get('itemsPerPage', 9999); //, Session::get('itemsPerPage', 9999));
 
         if ($itemsPerPage) {
-            Session::put('itemsPerPage', $itemsPerPage);
+            //Session::put('itemsPerPage', $itemsPerPage);
         }
 
         if (Input::get('page')) {
-            Session::put('page', Input::get('page'));
+            //Session::put('page', Input::get('page'));
         }
+        if ($this->collection) {
+            $collection = Collection::findOrFail($this->collection);
 
-        if ($collectionId) {
-            $collection = Collection::find($collectionId);
-            if (!$collection) {
-                return Response::json(array('error' => 'collection does not exists'));
-            }
-            $documents = $collection->documents()->with('loans')->paginate($itemsPerPage);
+            //$documents = $collection->with('loans')->documents();
+
+            //$collections = Collection::whereIn('id', $this->collections)->get();
+            
+            // $documents = Document::wherehas('collections', function($q) {
+            //     $q->whereIn('collections.id', $this->collections);
+            // });
+
+            $documents = $collection->documents()->with('loans');
         } else {
-            $documents = Document::with('loans')->paginate($itemsPerPage);
-            $collection = null;
+            $documents = Document::with('loans');
+        }
+        //if ($itemsPerPage !== 9999) {
+            $documents = $documents->paginate($itemsPerPage);
+       // }
+
+        foreach ($documents as $document) {
+            $document->authors = explode(';', $document->authors);
+            if (count($document->authors) > 3) {
+                $document->authors = implode(', ', array_slice($document->authors, 0, 3)) . ' m.fl.';
+            } else {
+                $document->authors = implode(', ', $document->authors);
+            }
         }
 
         $content_types = array('application/json', 'text/html');
-        $content_type = http_negotiate_content_type($content_types);
 
         $negotiator = new \Negotiation\FormatNegotiator();
         $acceptHeader = $_SERVER['HTTP_ACCEPT'];
@@ -73,8 +102,9 @@ class DocumentsController extends BaseController {
 
             return Response::view('documents.index', array(
                 'title' => 'Dokumenter',
-                'collections' => $collections,
+                'collections' => $allcollections,
                 'collection' => $collection,
+                //'collection_ids' => join(',', $this->collections),
                 'documents' => $documents,
                 'from' => $documents->getFrom(),
                 'to' => $documents->getTo(),
@@ -89,38 +119,10 @@ class DocumentsController extends BaseController {
                 'from' => $documents->getFrom(),
                 'to' => $documents->getTo(),
                 'total' => $documents->getTotal(),
-                'collection' => $collection,
                 'documents' => $documents->getCollection()->toArray()
-                ));
+            ));
 
         }
-    }
-
-	/**
-	 * Show the form for creating a new resource.
-	 *
-	 * @return Response
-	 */
-	public function getCreate()
-	{
-        $collections = array();
-        foreach (Collection::all() as $c) {
-            $collections[$c->id] = $c->name;
-        }
-
-        $args = array(
-            'formData' => array(
-                'action' => 'DocumentsController@postStore',
-                'method' => 'POST',
-                'class' => 'form-horizontal'
-            ),
-            'title' => 'Dokumenter : Legg til ',
-            'document' => new Document,
-            'collections' => $collections,
-            'collection' => Input::get('collection'),
-            'isNew' => true
-        );
-		return Response::view('documents.edit', $args);
     }
 
 	/**
@@ -128,27 +130,27 @@ class DocumentsController extends BaseController {
 	 *
 	 * @return Response
 	 */
-	public function postStore()
-	{
+	// public function postStore()
+	// {
 
-		$doc = new Document;
+	// 	$doc = new Document;
 
-        foreach (Document::$fields as $field) {
-            $doc->$field = Input::get($field) ?: null;
-        }
+ //        foreach (Document::$fields as $field) {
+ //            $doc->$field = Input::get($field) ?: null;
+ //        }
 
-        if (!$doc->save()) {
-            return Redirect::back()
-                ->withErrors($doc->errors)
-                ->withInput();
-        }
+ //        if (!$doc->save()) {
+ //            return Redirect::back()
+ //                ->withErrors($doc->errors)
+ //                ->withInput();
+ //        }
 
-        $collections = Input::get('collections');
-        $doc->collections()->sync($collections ?: array());
+ //        $collections = Input::get('collections');
+ //        $doc->collections()->sync($collections ?: array());
 
-        return Redirect::back()
-            ->with('status', 'Dokumentet ble lagret');
-	}
+ //        return Redirect::back()
+ //            ->with('status', 'Dokumentet ble lagret');
+	// }
 
 	/**
 	 * Show the form for editing the specified resource.
@@ -163,6 +165,10 @@ class DocumentsController extends BaseController {
             $collections[$c->id] = $c->name;
         }
 
+        if (!$this->collection) {
+            dd('no collection');
+        }
+
         $args = array(
             'formData' => array(
                 'action' => array('DocumentsController@putUpdate', $id),
@@ -172,7 +178,7 @@ class DocumentsController extends BaseController {
             'title' => 'Rediger dokument',
             'document' => Document::with('collections')->find($id),
             'collections' => $collections,
-            'collection' => Input::get('collection'),
+            'collection' => $this->collection,
             'isNew' => false
         );
         return Response::view('documents.edit', $args);
@@ -201,8 +207,8 @@ class DocumentsController extends BaseController {
         $collections = Input::get('collections');
         $doc->collections()->sync($collections ?: array());
 
-        return Redirect::action('DocumentsController@getIndex')
-            ->with('status', 'den blei lagra');
+        return Redirect::action('DocumentsController@getIndex', array('collection' => $this->collection))
+            ->with('status', 'Dokumentet ble lagret');
 	}
 
     /**
@@ -232,6 +238,107 @@ class DocumentsController extends BaseController {
 
         return Redirect::action('DocumentsController@getIndex')
             ->with('status', 'den blei sletta');
+    }
+
+    /**
+     * Show the form to create a document
+     *
+     * @return Response
+     */
+    public function getCreate()
+    {
+        if ($this->collection) {
+            $collection = Collection::find($this->collection);
+        }
+
+        return View::make('documents.create')
+            ->with('title', 'Registrer dokument')
+            ->with('collection', $collection);
+    }
+
+    /**
+     * Add a document to a collection
+     *
+     * @param  int  $id
+     * @return Response
+     */
+    public function postStore()
+    {
+
+        $collection = Collection::find($this->collection);
+        $barcode = strtolower(Input::get('barcode'));
+
+        $doc = Document::where('bibsys_dokid', $barcode)->orWhere('bibsys_knyttid', $barcode)->first();
+        if ($doc) {
+            if ($doc->collections->contains($collection->id)) {
+                return Redirect::action('DocumentsController@getIndex', array('collection' => $collection->id ))
+                    ->with('status', 'Dokumentet ligger allerede i samlingen');
+            } else {
+                $doc->collections()->attach($collection->id);
+                return Redirect::action('DocumentsController@getIndex', array('collection' => $collection->id ))
+                    ->with('status', 'Dokumentet ble lagt til i samlingen');
+            }
+        }
+
+        // TODO: Kanskje flytte til modellen?
+        $apiUrl = 'http://katapi.biblionaut.net/bibsys/' . $barcode;
+        //dd($apiUrl);
+        $request = Requests::get($apiUrl, array('Accept' => 'application/json'));
+        if ($request->status_code != 200) {
+            return Redirect::back()
+                ->with('status', 'Fant ikke "' . $barcode . '"" i BIBSYS.');
+        }
+        $body = json_decode($request->body, true);
+
+        if (isset($body['error'])) {
+            return Redirect::back()
+                ->with('status', 'Feil: ' . $body['error']);
+        }
+
+        $doc = new Document;
+        $doc->bibsys_dokid = $body['ids']['dokid'];
+        $doc->bibsys_objektid = $body['ids']['objektid'];
+        $doc->bibsys_knyttid = $body['ids']['knyttid'] ?: null;
+        if (isset($body['isbn']) && count($body['isbn']) != 0) {
+            $doc->isbn = $body['isbn'][0];
+        }
+        if (isset($body['series']) && count($body['series']) != 0) {
+            $doc->series = $body['series'][0]['title'];
+        }
+        $doc->publisher = $body['publisher'];
+        $doc->year = intval($body['year']);
+        $doc->title = $body['title'];
+        $doc->subtitle = $body['subtitle'];
+        $doc->cover = isset($body['cover_image']) ? $body['cover_image'] : NULL;
+
+
+        $doc->authors = implode('; ', array_map(function($author) {
+            $name = explode(',', $author['name'], 2);
+            return (count($name) == 2) ? $name[1] . ' ' . $name[0] : $name[0];
+        }, $body['authors']));
+        foreach ($body['classifications'] as $c) {
+            if ($c['system'] == 'dewey') {
+                $doc->dewey = $c['number'];
+            }
+        }
+        foreach ($body['holdings'] as $h) {
+            if ($h['id'] == $doc->bibsys_dokid) {
+                $doc->shelvingLocation = $h['shelvinglocation'];
+                $doc->callcode = $h['callcode'];
+            }
+        }
+
+        //dd($doc->json());
+
+        if (!$doc->save()) {
+            dd($doc->errors);
+        }
+
+        $doc->collections()->attach($collection->id);
+
+        return Redirect::action('DocumentsController@getEdit', array('id' => $doc->id))
+            ->with('status', 'Dokumentet ble lagt til i samlingen')
+            ->with('collection', $collection->id);
     }
 
 }

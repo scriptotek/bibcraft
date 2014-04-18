@@ -1,9 +1,11 @@
 @extends('master')
 @section('header')
+@if (Auth::check())
   <a href="{{ URL::action('DocumentsController@getIndex') }}" class="btn"><i class="icon-arrow-left"></i> Lista</a>
   <a href="{{ URL::action('DocumentsController@getEdit', $document->id) }}" class="btn"><i class="icon-pencil"></i> Rediger</a>
   <a href="{{ URL::action('DocumentsController@getDelete', $document->id) }}" class="btn"><i class="icon-trash"></i> Slett</a>
   <a href="{{ $document->url }}" class="btn"><i class="icon-globe"></i> Følg URL</a>
+@endif
 @stop
 @section('container')
 
