@@ -6,3 +6,5 @@
 /client/public/covers
 /client/public/config.json
 /client/public/components
+*.sqlite
+*.sql
