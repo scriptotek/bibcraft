@@ -55,6 +55,7 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       {{ Form::textWithLabel('bibsys_knyttid', 'Knyttid') }}
       {{ Form::textWithLabel('bibsys_objektid', 'Objektid') }}
       {{ Form::textWithLabel('isbn', 'ISBN') }}
+      {{ Form::textWithLabel('cover', 'Omslagsbilde-URL') }}
       {{ Form::textWithLabel('shelvinglocation', 'Samling') }}
       {{ Form::textWithLabel('callcode', 'Hylleplass') }}
       {{ Form::textWithLabel('title', 'Tittel') }}
@@ -64,7 +65,6 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       {{ Form::textWithLabel('series', 'Serie') }}
       {{ Form::textWithLabel('volume', 'Bind') }}
       {{ Form::textWithLabel('year', 'Utgivelsesår') }}
-      {{ Form::textWithLabel('cover', 'Omslagsbilde-URL') }}
       {{ Form::textWithLabel('dewey', 'Dewey') }}
 
       <div class="form-group">

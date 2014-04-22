@@ -111,6 +111,12 @@
       $('.alert').hide().slideDown();
     }
 
+    if ($('.alert').length != 0) {
+      $('.alert').on('click', function() {
+        $('.alert').hide();
+      });
+    }
+
     //parent.postMessage("Hello","*");
 
   });

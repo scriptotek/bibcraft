@@ -34,7 +34,7 @@
 
       $('#collections').select2();
 
-      $('#bibsys_dokid').focus();
+      $('#cover').focus();
 
       var coverHtml = $('#cover').val() ? '<img alt="Bildet ble ikke funnet" src="' + $('#cover').val() + '" style="max-width:150px;" />' : 'n/a';
       $('#cover').data('title', 'Forhåndsvis omslagsbilde')
