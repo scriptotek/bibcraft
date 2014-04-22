@@ -1,7 +1,11 @@
 <?php
 
+use Illuminate\Support\MessageBag;
+
 class Document extends Eloquent {
 	protected $guarded = array();
+
+    private $_bibsysCache;
 
     /**
      * Validation errors.
@@ -9,7 +13,6 @@ class Document extends Eloquent {
      * @var Illuminate\Support\MessageBag
      */
     public $errors;
-
 
     /**
      * List of fields (the one source of truth!)
@@ -183,7 +186,7 @@ class Document extends Eloquent {
         curl_setopt($ch, CURLOPT_USERAGENT, 'UBO Scriptotek Dalek/0.1 (+http://biblionaut.net/bibsys/)');
         //curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.65 Safari/537.36');
         curl_setopt($ch, CURLOPT_HEADER, 0); // no headers in the output
-        curl_setopt($ch, CURLOPT_REFERER, 'http://ask.bibsys.no');
+        //curl_setopt($ch, CURLOPT_REFERER, 'http://ask.bibsys.no');
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 2);
@@ -237,8 +240,80 @@ class Document extends Eloquent {
             }
         }
 
+        //dd('end');
+
         parent::save($options);
         return true;
+    }
+
+    private function fetchFromBibsys($barcode)
+    {
+        if (!isset($this->_bibsysCache)) {        
+            $apiUrl = 'http://katapi.biblionaut.net/bibsys/' . $barcode;
+            $request = Requests::get($apiUrl, array('Accept' => 'application/json'));
+            if ($request->status_code != 200) {
+                $this->errors->add('not_in_bibsys', 'Fant ikke "' . $barcode . '" i BIBSYS.');
+                return false;
+            }
+            $this->_bibsysCache = json_decode($request->body, true);
+        }
+        return $this->_bibsysCache;
+    }
+
+    public function importMetadataFromBibsys($barcode)
+    {
+        $this->errors = new MessageBag;
+        $body = $this->fetchFromBibsys($barcode);
+        if (!$body) return false;
+
+        if (isset($body['error'])) {
+            $this->errors->add('error_from_bibsys', $body['error']);
+            return false;
+        }
+
+        $this->bibsys_dokid = $body['ids']['dokid'];
+        $this->bibsys_objektid = $body['ids']['objektid'];
+        $this->bibsys_knyttid = $body['ids']['knyttid'] ?: null;
+        if (isset($body['isbn']) && count($body['isbn']) != 0) {
+            $this->isbn = $body['isbn'][0];
+        }
+        if (isset($body['series']) && count($body['series']) != 0) {
+            $this->series = $body['series'][0]['title'];
+        }
+        $this->publisher = $body['publisher'];
+        $this->year = intval($body['year']);
+        $this->title = $body['title'];
+        if (isset($body['subtitle']) && !empty($body['subtitle'])) $this->title .= ' ' . $body['subtitle'];
+        if (isset($body['part_no']) && !empty($body['part_no'])) $this->title .= '. ' . $body['part_no'];
+        $this->subtitle = null;
+
+        //dd($this->title);
+
+        $this->authors = implode('; ', array_map(function($author) {
+            $name = explode(',', $author['name'], 2);
+            return (count($name) == 2) ? $name[1] . ' ' . $name[0] : $name[0];
+        }, $body['authors']));
+
+        foreach ($body['classifications'] as $c) {
+            if ($c['system'] == 'dewey') {
+                $this->dewey = $c['number'];
+            }
+        }
+        foreach ($body['holdings'] as $h) {
+            if ($h['id'] == $this->bibsys_dokid) {
+                $this->shelvingLocation = $h['shelvinglocation'];
+                $this->callcode = $h['callcode'];
+            }
+        }
+        return true;
+    }
+
+    public function importCover($barcode)
+    {
+        $body = $this->fetchFromBibsys($barcode);
+        if (!$body) return false;
+
+        $this->cover = isset($body['cover_image']) ? $body['cover_image'] : NULL;
     }
 
 }

@@ -96,17 +96,25 @@
         }*/
         ?>
 
-        @if (Auth::check())
-        <div class="hidden-print">
-          <br>
-          <a href="{{ URL::action('DocumentsController@getEdit', array(
-            'id' => $obj->id, 
-            'collection' => $collection->id,
-            )) }}"><i class="icon-pencil"></i> rediger</a>
-          <a href="{{ URL::action('CollectionsController@getRemoveDocument', array($collection->id, $obj->id)) }}"><i class="icon-trash"></i> fjern</a>
-        </div>
-        @endif
       </div>
+
+      @if (Auth::check())
+      <div class="hidden-print">
+
+        <a href="{{ URL::action('DocumentsController@getEdit', array(
+          'id' => $obj->id, 
+          'collection' => $collection->id,
+          )) }}"> [rediger]</a>
+
+        <a href="{{ URL::action('CollectionsController@getRemoveDocument', array($collection->id, $obj->id)) }}"> [fjern]</a>
+
+        <a href="{{ URL::action('DocumentsController@getReimportMetadata', array(
+          'id' => $obj->id, 
+          'collection' => $collection->id,
+          )) }}"> [oppdater metadata fra Bibsys]</a>
+
+      </div>
+      @endif
 
       <div class="breaker"><!-- --></div>
 

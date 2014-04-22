@@ -55,8 +55,6 @@ Route::group(array('before' => 'guest'), function()
 Route::group(array('before' => 'auth'), function()
 {
 
-	Route::get('/documents/edit/{id}', 'DocumentsController@getEdit');
-
 	//Route::get('/collections/{collectionId}/documents/{documentId}/remove', 'CollectionsController@getRemoveDocument');
 	Route::controller('collections', 'CollectionsController');
 
@@ -73,7 +71,8 @@ Route::group(array('before' => 'auth'), function()
 
 	Route::get('/documents/edit/{documentId}', 'DocumentsController@getEdit');
 	Route::put('/documents/{documentId}', 'DocumentsController@putUpdate');
-	Route::post('/documents/store/{documentId}', 'DocumentsController@postStore');
+	Route::post('/documents/store', 'DocumentsController@postStore');
+	Route::get('/documents/reimport-metadata/{documentId}', 'DocumentsController@getReimportMetadata');
 
 });
 

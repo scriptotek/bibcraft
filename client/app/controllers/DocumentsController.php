@@ -88,6 +88,7 @@ class DocumentsController extends BaseController {
             } else {
                 $document->authors = implode(', ', $document->authors);
             }
+            $document->authors = trim($document->authors);
         }
 
         $content_types = array('application/json', 'text/html');
@@ -280,53 +281,15 @@ class DocumentsController extends BaseController {
             }
         }
 
-        // TODO: Kanskje flytte til modellen?
-        $apiUrl = 'http://katapi.biblionaut.net/bibsys/' . $barcode;
-        //dd($apiUrl);
-        $request = Requests::get($apiUrl, array('Accept' => 'application/json'));
-        if ($request->status_code != 200) {
-            return Redirect::back()
-                ->with('status', 'Fant ikke "' . $barcode . '"" i BIBSYS.');
-        }
-        $body = json_decode($request->body, true);
-
-        if (isset($body['error'])) {
-            return Redirect::back()
-                ->with('status', 'Feil: ' . $body['error']);
-        }
-
         $doc = new Document;
-        $doc->bibsys_dokid = $body['ids']['dokid'];
-        $doc->bibsys_objektid = $body['ids']['objektid'];
-        $doc->bibsys_knyttid = $body['ids']['knyttid'] ?: null;
-        if (isset($body['isbn']) && count($body['isbn']) != 0) {
-            $doc->isbn = $body['isbn'][0];
+        if (!$doc->importMetadataFromBibsys($barcode)) {
+            //dd($doc->errors);
+            return Redirect::back()
+                ->withErrors($doc->errors);
         }
-        if (isset($body['series']) && count($body['series']) != 0) {
-            $doc->series = $body['series'][0]['title'];
-        }
-        $doc->publisher = $body['publisher'];
-        $doc->year = intval($body['year']);
-        $doc->title = $body['title'];
-        $doc->subtitle = $body['subtitle'];
-        $doc->cover = isset($body['cover_image']) ? $body['cover_image'] : NULL;
+        $doc->importCover($barcode);
 
-
-        $doc->authors = implode('; ', array_map(function($author) {
-            $name = explode(',', $author['name'], 2);
-            return (count($name) == 2) ? $name[1] . ' ' . $name[0] : $name[0];
-        }, $body['authors']));
-        foreach ($body['classifications'] as $c) {
-            if ($c['system'] == 'dewey') {
-                $doc->dewey = $c['number'];
-            }
-        }
-        foreach ($body['holdings'] as $h) {
-            if ($h['id'] == $doc->bibsys_dokid) {
-                $doc->shelvingLocation = $h['shelvinglocation'];
-                $doc->callcode = $h['callcode'];
-            }
-        }
+        //dd($doc);
 
         //dd($doc->json());
 
@@ -339,6 +302,25 @@ class DocumentsController extends BaseController {
         return Redirect::action('DocumentsController@getEdit', array('id' => $doc->id))
             ->with('status', 'Dokumentet ble lagt til i samlingen')
             ->with('collection', $collection->id);
+    }
+
+    public function getReimportMetadata($id)
+    {
+        $doc = Document::findOrFail($id);
+        $barcode = $doc->bibsys_knyttid ?: $doc->bibsys_dokid;
+        if (!$doc->importMetadataFromBibsys($barcode)) {
+            return Redirect::back()
+                ->withErrors($doc->errors);
+        }
+        if (!$doc->save()) {
+            dd($doc->errors);
+        }
+
+        $opts = array();
+        if ($this->collection) $opts['collection'] = $this->collection;
+
+        return Redirect::action('DocumentsController@getIndex', $opts)
+            ->with('status', 'Metadata ble erstattet med nye data fra Bibsys for "' . $doc->title . '"');
     }
 
 }
