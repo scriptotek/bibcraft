@@ -59,7 +59,8 @@
           </p>
         @else
           <p>
-            Siste påminnelse sendt {{ $loan->lastReminder() == 0 ? 'i dag' : 'for ' . $loan->lastReminder() . ' dager siden' }}
+            {{ $loan->reminders->count() == 1 ? 'Én påminnelse sendt' : $loan->reminders->count() . ' påminnelser sendt. Siste påminnelse sendt'  }}
+            {{ $loan->lastReminder() == 0 ? 'i dag' : 'for ' . $loan->lastReminder() . ' dager siden' }}
           </p>
         @endif
 
