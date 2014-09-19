@@ -249,7 +249,7 @@ class Document extends Eloquent {
     private function fetchFromBibsys($barcode)
     {
         if (!isset($this->_bibsysCache)) {        
-            $apiUrl = 'http://katapi.biblionaut.net/bibsys/' . $barcode;
+            $apiUrl = 'http://katapi.biblionaut.net/documents/show/' . $barcode . '.json';
             $request = Requests::get($apiUrl, array('Accept' => 'application/json'));
             if ($request->status_code != 200) {
                 $this->errors->add('not_in_bibsys', 'Fant ikke "' . $barcode . '" i BIBSYS.');
@@ -271,11 +271,19 @@ class Document extends Eloquent {
             return false;
         }
 
-        $this->bibsys_dokid = $body['ids']['dokid'];
-        $this->bibsys_objektid = $body['ids']['objektid'];
-        $this->bibsys_knyttid = $body['ids']['knyttid'] ?: null;
-        if (isset($body['isbn']) && count($body['isbn']) != 0) {
-            $this->isbn = $body['isbn'][0];
+        $this->bibsys_objektid = $body['bibsys_id'];
+
+        foreach ($body['holdings'] as $holding) {
+            if ( $holding['id'] == $barcode || $holding['barcode'] == $barcode ) {
+                $this->bibsys_dokid = $holding['id'];
+                $this->bibsys_knyttid = $holding['barcode'];
+                $this->shelvingLocation = $holding['shelvinglocation'];
+                $this->callcode = $holding['callcode'];
+            }
+        }
+
+        if (isset($body['isbns']) && count($body['isbns']) != 0) {
+            $this->isbn = $body['isbns'][0];
         }
         if (isset($body['series']) && count($body['series']) != 0) {
             $this->series = $body['series'][0]['title'];
@@ -283,28 +291,22 @@ class Document extends Eloquent {
         $this->publisher = $body['publisher'];
         $this->year = intval($body['year']);
         $this->title = $body['title'];
-        if (isset($body['subtitle']) && !empty($body['subtitle'])) $this->title .= ' ' . $body['subtitle'];
         if (isset($body['part_no']) && !empty($body['part_no'])) $this->title .= '. ' . $body['part_no'];
         $this->subtitle = null;
 
         //dd($this->title);
 
-        $this->authors = implode('; ', array_map(function($author) {
+        $this->authors = implode(', ', array_map(function($author) {
             $name = explode(',', $author['name'], 2);
             return (count($name) == 2) ? $name[1] . ' ' . $name[0] : $name[0];
         }, $body['authors']));
 
-        foreach ($body['classifications'] as $c) {
-            if ($c['system'] == 'dewey') {
+        foreach ($body['classes'] as $c) {
+            if ($c['system'] == 'ddc') {
                 $this->dewey = $c['number'];
             }
         }
-        foreach ($body['holdings'] as $h) {
-            if ($h['id'] == $this->bibsys_dokid) {
-                $this->shelvingLocation = $h['shelvinglocation'];
-                $this->callcode = $h['callcode'];
-            }
-        }
+
         return true;
     }
 

@@ -59,7 +59,6 @@ Form::macro('textareaWithLabel', function($id, $label, $extras='')
       {{ Form::textWithLabel('shelvinglocation', 'Samling') }}
       {{ Form::textWithLabel('callcode', 'Hylleplass') }}
       {{ Form::textWithLabel('title', 'Tittel') }}
-      {{ Form::textWithLabel('subtitle', 'Undertittel') }}
       {{ Form::textWithLabel('authors', 'Forfatter(e) e.l.') }}
       {{ Form::textWithLabel('publisher', 'Forlag') }}
       {{ Form::textWithLabel('series', 'Serie') }}
