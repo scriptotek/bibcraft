@@ -51,6 +51,8 @@
         <img src="{{ $obj->cachedCover }}" alt="Cover">
       </div>
 
+      <div class="text">
+
       <a href="http://ask.bibsys.no/ask/action/show?pid={{ $obj->bibsys_objektid }}&amp;kid=biblio" class="caption">
         {{ $obj->title }} {{ $obj->subtitle }}
       </a>
@@ -115,8 +117,8 @@
 
       </div>
       @endif
+      </div><!-- .text -->
 
-      <div class="breaker"><!-- --></div>
 
     </li>
     @endforeach
