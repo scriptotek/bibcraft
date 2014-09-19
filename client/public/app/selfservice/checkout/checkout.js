@@ -145,12 +145,14 @@
 						LogService.log('Bruker bekreftet!', 'info');
 						user_id = parseInt(response.user_id, 10);
 
-						if ($scope.newuser) {
+						completeCheckout();
+
+						/* if ($scope.newuser) {
 							$scope.card_status = 'Legg et nytt lånekort på RFID-leseren. Hold det i ro til kortet er ferdigskrevet.';
 							$scope.step = 'writecard';
 						} else {
 							completeCheckout();
-						}
+						} */
 					}
 			});
 		}
