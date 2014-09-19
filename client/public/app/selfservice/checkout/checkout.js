@@ -197,6 +197,7 @@
 					console.log('------- CHECKOUT COMPLETE -----------');
 					$scope.checkout_status = 'Utlånet var vellykket!';
 					$scope.step = 'complete';
+					CartService.clear();
 					//$location.path('/users/' + user_id);
 				});
 
